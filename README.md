@@ -4,9 +4,13 @@ QuartoのQMDから、アニメーションを内包する**単一HTML**と、各
 
 ## まず見る
 
-[例のHTML](output/nco-intro.html) · [例のPDF](output/nco-intro.pdf) · [QMD](decks/nco-intro/slides.qmd) · [スライド案](decks/nco-intro/memo.md)
+[▶ スライドを開く（HTMLプレビュー）](https://htmlpreview.github.io/?https://github.com/edoaki/quarto-html/blob/main/output/nco-intro.html) · [PDFを見る](output/nco-intro.pdf)
 
-GitHub上ではHTMLのソースが表示されます。Rawからダウンロードし、ブラウザで開いてください。スマホもHTMLをブラウザで開きます（ファイル管理アプリ内の簡易プレビューはJavaScriptが動かない場合があります）。
+HTMLプレビューは外部サービスのHTMLPreviewで、GitHubの `main` ブランチにあるスライドをブラウザ表示します。矢印キーやタップで操作できます。
+
+オフラインで見る場合は、[HTMLファイル](output/nco-intro.html)を開き、右上の「Download raw file」から保存してブラウザで開いてください。スマホもHTMLをブラウザで開きます（ファイル管理アプリ内の簡易プレビューはJavaScriptが動かない場合があります）。
+
+制作元：[QMD](decks/nco-intro/slides.qmd) · [スライド案](decks/nco-intro/memo.md)
 
 ## 準備
 
