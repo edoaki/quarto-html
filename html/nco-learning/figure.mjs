@@ -11,7 +11,7 @@ const r0=rng(7);
 export const train=[...Array(4)].map(()=>{const P=spread(r0);return {P,route:sample(P,r0)};}).map(t=>({...t,length:tourLength(t.P,t.route)}));
 export const query=tspCases[0].cities;
 export const answer=optimalTour(query,0);
-const steps=['問題の配置を用意する','配置をモデルへ渡す','経路を作り、経路長を計算する','経路長を使ってモデルを更新する','学習済みモデルを推論へ移す','新しい配置をモデルへ渡す','経路を出力する'];
+const steps=['問題の配置を用意する','配置をモデルへ渡す','経路を作り、経路長を計算する','経路長を使ってモデルを更新する','学習済みモデルを移し、新しい配置から経路を出力する'];
 
 // 小さな地図。route を count 本まで描く。
 function thumb(key,P,{x,y,s=100,route=null,count=n,opacity=1,start=true}){
@@ -57,9 +57,12 @@ function scene(k,{pulse=0,length=true,transfer=null,inputLeg=false}={}){
   s+=model('model-inf',pos.x,pos.y,{pulse:k>=5?pulse:0,trained:true});
   if(!transfer)s+=keyed('trained-label',text(845,163,'学習済み',20,'#287c79','middle'));
  }
- if(k>=5)s+=arrow('arrow-in',722,227,772,227);
+ // 見えない長さ0の矢印を先に置き、線の終点と矢尻を一緒に補間する。
+ if(k>=4){
+  s+=arrow('arrow-in',722,227,k>=5?772:722,227,C.ink,k>=5?1:0);
+  s+=arrow('arrow-out',918,227,k>=6?958:918,227,C.ink,k>=6?1:0);
+ }
  if(k>=6){
-  s+=arrow('arrow-out',918,227,958,227);
   s+=thumb('answer',query,{x:966,y:170,s:110,route:answer.route,count:answer.route.length-1});
  }
  return svg(s,'配置から経路を作り、経路長を使ってモデルを更新する。学習済みモデルを移して、新しい配置から経路を作る');
@@ -67,14 +70,12 @@ function scene(k,{pulse=0,length=true,transfer=null,inputLeg=false}={}){
 const f=(k,options={},duration=450)=>({markup:scene(k,options),duration});
 const work=k=>[1,2,3,1,2,3,0].map(pulse=>f(k,{pulse},170));
 export default {id:'F24',title:'NCOの学習と推論',steps,
- renderStep(k){return scene(k);},
+ renderStep(k){return scene(k===4?6:k);},
  transition(from,to){if(to!==from+1)return null;
   if(to===1)return [f(1,{inputLeg:true},350),f(1,{},350),...work(1)];
   // 全ての経路を同時に描く。自己回帰の都市選択としては描かない。
   if(to===2)return [f(2,{length:false},850),f(2,{},450)];
   if(to===3)return [f(3,{},650),...work(3)];
   // 同じモデルの位置を補間し、必ず右へ進んでから上へ移す。
-  if(to===4)return [f(4,{transfer:'start'},0),f(4,{transfer:'right'},850),f(4,{},700)];
-  if(to===5)return [f(5,{},500),...work(5)];
-  if(to===6)return [f(6,{},850)];
+  if(to===4)return [f(4,{transfer:'start'},0),f(4,{transfer:'right'},850),f(4,{},700),f(5,{},500),...work(5),f(6,{},850)];
   return null;}};

@@ -172,13 +172,20 @@ End.
           animation.setStep(4,true).then(()=>done=true);
           while(!done){const g=document.querySelector('[data-key="model-inf"]');
             if(g){const m=g.transform.baseVal.consolidate().matrix;samples.push([m.e,m.f]);}
+            for(const key of ['arrow-in','arrow-out']){
+              const a=document.querySelector(`[data-key="${key}"]`);
+              if(a){const l=a.querySelector('line'),p=a.querySelector('polygon').points.getItem(0);
+                if(Math.abs(+l.getAttribute('x2')-p.x)>.01 || Math.abs(+l.getAttribute('y2')-p.y)>.01)
+                  throw new Error('Arrowhead detached from line');}
+            }
             await new Promise(requestAnimationFrame);}
           return samples;
         }""")
         self.assertTrue(any(210<x<770 and abs(y-330)<.1 for x,y in positions))
         self.assertTrue(any(abs(x-780)<.1 and 195<y<325 for x,y in positions))
         self.assertTrue(all(abs(y-330)<.1 or abs(x-780)<.1 for x,y in positions))
-        frame.evaluate('animation.setStep(6,false)')
+        self.assertEqual(frame.evaluate('animation.step'),4)
+        self.assertEqual(frame.evaluate('animation.steps'),4)
         self.assertGreater(frame.locator('[data-key="answer"] line').count(),0)
         frame.evaluate('animation.setStep(0,false)')
         self.assertEqual(frame.locator('[data-key="model-inf"]').count(),0)
