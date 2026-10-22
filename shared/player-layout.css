@@ -33,10 +33,11 @@ body.export #stage{left:32px!important;top:18px!important;transform:scale(.95)!i
 #stage .cover .cover-title{margin-top:175px;font-size:1.7em;font-weight:650;line-height:1.55;letter-spacing:.015em}
 #stage .cover .cover-title::before{content:'';display:block;width:92px;height:5px;background:#4c91c4;margin-bottom:28px}
 #stage .cover p{color:#174b78}
-#stage .section-slide{background:linear-gradient(120deg,#f7fafc,#e7f0f7);padding-top:190px}
-#stage .section-slide h1{color:#174b78;font-size:58px;position:relative;z-index:1}
-#stage .section-slide h1::before{width:85px;height:5px;background:#5194c7}
-#stage .section-slide::before{content:attr(data-chapter);position:absolute;right:70px;bottom:70px;font-size:210px;font-weight:700;line-height:1;color:#d0e1ef;pointer-events:none}
+#stage .section-slide{background:radial-gradient(ellipse at 100% 0%,#287d91 0,transparent 60%),linear-gradient(125deg,#102d4b,#16476c 65%,#1b637c);padding:205px 65px 0;color:#fff;overflow:hidden}
+#stage .section-slide h1{color:#fff;font-size:58px;position:relative;z-index:1;letter-spacing:.035em;line-height:1.5}
+#stage .section-slide h1::before{width:76px;height:4px;background:#8ddbdc;margin-bottom:32px}
+#stage .section-slide::before{content:'';position:absolute;width:650px;height:650px;right:-220px;bottom:-340px;border:1px solid #ffffff20;border-radius:50%;box-shadow:0 0 0 70px #ffffff05,0 0 0 140px #ffffff04;pointer-events:none}
+#stage .section-slide .page-number{color:#d3e5ef}
 #stage table{border-top:2px solid #4b86b4;border-bottom:1px solid #b8cedf}
 #stage table th{background:#e8f1f8;color:#174b78;font-weight:650}
 #stage table tbody tr:nth-child(even){background:#f7fafd}

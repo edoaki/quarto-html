@@ -198,10 +198,11 @@ body.export #stage{left:32px!important;top:18px!important;transform:scale(.95)!i
 #stage .cover .cover-title{margin-top:175px;font-size:1.7em;font-weight:650;line-height:1.55;letter-spacing:.015em}
 #stage .cover .cover-title::before{content:'';display:block;width:92px;height:5px;background:#4c91c4;margin-bottom:28px}
 #stage .cover p{color:#174b78}
-#stage .section-slide{background:linear-gradient(120deg,#f7fafc,#e7f0f7);padding-top:190px}
-#stage .section-slide h1{color:#174b78;font-size:58px;position:relative;z-index:1}
-#stage .section-slide h1::before{width:85px;height:5px;background:#5194c7}
-#stage .section-slide::before{content:attr(data-chapter);position:absolute;right:70px;bottom:70px;font-size:210px;font-weight:700;line-height:1;color:#d0e1ef;pointer-events:none}
+#stage .section-slide{background:radial-gradient(ellipse at 100% 0%,#287d91 0,transparent 60%),linear-gradient(125deg,#102d4b,#16476c 65%,#1b637c);padding:205px 65px 0;color:#fff;overflow:hidden}
+#stage .section-slide h1{color:#fff;font-size:58px;position:relative;z-index:1;letter-spacing:.035em;line-height:1.5}
+#stage .section-slide h1::before{width:76px;height:4px;background:#8ddbdc;margin-bottom:32px}
+#stage .section-slide::before{content:'';position:absolute;width:650px;height:650px;right:-220px;bottom:-340px;border:1px solid #ffffff20;border-radius:50%;box-shadow:0 0 0 70px #ffffff05,0 0 0 140px #ffffff04;pointer-events:none}
+#stage .section-slide .page-number{color:#d3e5ef}
 #stage table{border-top:2px solid #4b86b4;border-bottom:1px solid #b8cedf}
 #stage table th{background:#e8f1f8;color:#174b78;font-weight:650}
 #stage table tbody tr:nth-child(even){background:#f7fafd}
@@ -227,12 +228,24 @@ body.export .highlight{transition:none}
 #stage #result-tsp th,#stage #result-tsp td{white-space:nowrap}
 #stage #result-tsp .result-note{margin-top:24px;font-size:18px;line-height:1.55;color:var(--muted)}
 #stage #result-tsp .result-note p{font-size:inherit;line-height:inherit;margin:10px 0}
+
+/* Closing comparison, followed by one shared takeaway. */
+#stage #summary .summary-columns{gap:24px;margin-top:28px;align-items:stretch}
+#stage #summary .column{padding:23px 26px;border-radius:10px;font-size:23px;line-height:1.6;min-width:0}
+#stage #summary .summary-benefits{background:#edf6fa;border-top:4px solid #2b8da3}
+#stage #summary .summary-limitations{background:#f3f2f8;border-top:4px solid #7d739e}
+#stage #summary h3{font-size:28px;margin:0 0 16px;color:#174b78}
+#stage #summary .summary-limitations h3,#stage #summary .summary-limitations strong{color:#655982}
+#stage #summary .column p{font-size:21px;line-height:1.6;margin:0 0 16px}
+#stage #summary li{font-size:23px;line-height:1.65;margin-bottom:10px}
+#stage #summary .summary-takeaway{margin-top:24px;padding:15px 22px;border-left:4px solid #2b8da3;background:#edf6fa}
+#stage #summary .summary-takeaway p{margin:0;font-size:26px;font-weight:650;color:#174b78}
 </style></head><body><div class="reveal"><main class="slides" id="stage"><section class="slide cover" data-group="" data-section-start="false" id="cover"><h2 class="cover">機械学習を使った組み合わせ最適化</h2>
 <div class="cover-title">
 <p>機械学習を使った組み合わせ最適化<br/>ニューラル組み合わせ最適化の紹介</p>
 </div>
-<span class="page-number">1 / 21</span></section><section class="slide section-slide" data-chapter="01" data-group="研究背景" data-section-start="true" id="研究背景"><h1>研究背景</h1>
-<span class="page-number">2 / 21</span></section><section class="slide" data-group="研究背景" data-section-start="false" id="background"><h2>研究背景</h2>
+<span class="page-number">1 / 20</span></section><section class="slide section-slide" data-chapter="01" data-group="研究背景" data-section-start="true" id="研究背景"><h1>研究背景</h1>
+<span class="page-number">2 / 20</span></section><section class="slide" data-group="研究背景" data-section-start="false" id="background"><h2>研究背景</h2>
 <p>配送の順番や作業の順番など、社会には組合せを考えて決める問題が多くある。</p>
 <div class="animation loaded"><iframe class="model-animation" srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;ja&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;/&gt;&lt;meta content=&quot;width=device-width,initial-scale=1&quot; name=&quot;viewport&quot;/&gt;&lt;title&gt;説明図&lt;/title&gt;&lt;style&gt;:root{color-scheme:light;font-family:&quot;Hiragino Kaku Gothic ProN&quot;,&quot;Yu Gothic&quot;,sans-serif;color:#233244;background:#ffffff}*{box-sizing:border-box}body{margin:0;padding:14px 20px;height:100vh;display:flex;flex-direction:column;overflow:hidden}header{display:flex;align-items:baseline;justify-content:space-between;gap:20px}h1{font-size:20px;margin:0;font-weight:600}#stage{flex:1;min-height:0;cursor:pointer}#stage svg{width:100%;height:100%;display:block}.embedded header{display:none}
@@ -247,7 +260,7 @@ mount(figure);
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
 " tabindex="-1" title="配送経路とスケジューリング"></iframe></div>
 <p>制約を満たす組合せから、目的関数が最もよいものを選ぶ問題を<strong>組合せ最適化</strong>と呼ぶ。<span class="citation" data-cites="dantzig1954 jobshop">[1, 2]</span></p>
-<footer class="citations"><p>[1] G. Dantzig, R. Fulkerson, S. Johnson. Solution of a Large-Scale Traveling-Salesman Problem . Journal of the Operations Research Society of America . 1954.</p><p>[2] A. S. Manne. On the Job-Shop Scheduling Problem . Operations Research . 1960.</p></footer><span class="page-number">3 / 21</span></section><section class="slide figure-compact" data-group="研究背景" data-section-start="false" id="tsp"><h2 class="figure-compact">問題の例：巡回セールスマン問題</h2>
+<footer class="citations"><p>[1] G. Dantzig, R. Fulkerson, S. Johnson. Solution of a Large-Scale Traveling-Salesman Problem . Journal of the Operations Research Society of America . 1954.</p><p>[2] A. S. Manne. On the Job-Shop Scheduling Problem . Operations Research . 1960.</p></footer><span class="page-number">3 / 20</span></section><section class="slide figure-compact" data-group="研究背景" data-section-start="false" id="tsp"><h2 class="figure-compact">問題の例：巡回セールスマン問題</h2>
 <p>全都市を1回ずつ訪問して出発点へ戻る経路を、なるべく短くする問題。<br/>
 都市がN個のとき経路の順列は(N−1)!通りあり、都市が増えるほど膨大になる。</p>
 <div class="animation loaded"><iframe class="model-animation" srcdoc="&lt;!DOCTYPE html&gt;
@@ -266,7 +279,7 @@ mount(figure);
 <div class="footnote-small">
 <p>※ NP困難：NPに属するどの問題も多項式時間で帰着できる問題。多項式時間で解く方法は知られていない。</p>
 </div>
-<span class="page-number">4 / 21</span></section><section class="slide method-slide" data-group="研究背景" data-section-start="false" id="solver"><h2 class="method-slide">解き方1：数理最適化ソルバー</h2>
+<span class="page-number">4 / 20</span></section><section class="slide method-slide" data-group="研究背景" data-section-start="false" id="solver"><h2 class="method-slide">解き方1：数理最適化ソルバー</h2>
 <p>問題を数式（変数・制約・目的関数）で表し、分枝限定法などで最適解を探す。代表的なソルバーにGurobi、CPLEXがある。<span class="citation" data-cites="dantzig1954 gurobi">[1, 3]</span></p>
 <div class="columns">
 <div class="column" style="width:60%;">
@@ -295,7 +308,7 @@ mount(figure);
 </ul>
 </div>
 </div>
-<footer class="citations"><p>[1] G. Dantzig, R. Fulkerson, S. Johnson. Solution of a Large-Scale Traveling-Salesman Problem . Journal of the Operations Research Society of America . 1954.</p><p>[3] Gurobi Optimization. Objectives: Optimizer Reference Manual .</p></footer><span class="page-number">5 / 21</span></section><section class="slide method-slide" data-group="研究背景" data-section-start="false" id="heuristic"><h2 class="method-slide">解き方2：ヒューリスティクス</h2>
+<footer class="citations"><p>[1] G. Dantzig, R. Fulkerson, S. Johnson. Solution of a Large-Scale Traveling-Salesman Problem . Journal of the Operations Research Society of America . 1954.</p><p>[3] Gurobi Optimization. Objectives: Optimizer Reference Manual .</p></footer><span class="page-number">5 / 20</span></section><section class="slide method-slide" data-group="研究背景" data-section-start="false" id="heuristic"><h2 class="method-slide">解き方2：ヒューリスティクス</h2>
 <p>問題の性質に合わせた手順で、1つの解を素早く作る。<br/>
 例えば最近傍法では、今いる都市から最も近い未訪問の都市へ順に進む。<span class="citation" data-cites="lin1973">[4]</span></p>
 <div class="columns">
@@ -325,7 +338,7 @@ mount(figure);
 </ul>
 </div>
 </div>
-<footer class="citations"><p>[4] S. Lin, B. W. Kernighan. An Effective Heuristic Algorithm for the Traveling-Salesman Problem . Operations Research . 1973.</p></footer><span class="page-number">6 / 21</span></section><section class="slide method-slide" data-group="研究背景" data-section-start="false" id="metaheuristic"><h2 class="method-slide">解き方3：メタヒューリスティクス</h2>
+<footer class="citations"><p>[4] S. Lin, B. W. Kernighan. An Effective Heuristic Algorithm for the Traveling-Salesman Problem . Operations Research . 1973.</p></footer><span class="page-number">6 / 20</span></section><section class="slide method-slide" data-group="研究背景" data-section-start="false" id="metaheuristic"><h2 class="method-slide">解き方3：メタヒューリスティクス</h2>
 <p>解を少しずつ変えて良くしていく探索の枠組み。ここでは<strong>焼きなまし法</strong>を例に、悪くなる変更もある程度受け入れ、局所的に良い解から抜け出す様子を示す。</p>
 <div class="columns">
 <div class="column" style="width:60%;">
@@ -354,7 +367,7 @@ mount(figure);
 </ul>
 </div>
 </div>
-<span class="page-number">7 / 21</span></section><section class="slide" data-group="研究背景" data-section-start="false" id="methods"><h2>組合せ最適化の解き方</h2>
+<span class="page-number">7 / 20</span></section><section class="slide" data-group="研究背景" data-section-start="false" id="methods"><h2>組合せ最適化の解き方</h2>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -392,8 +405,8 @@ mount(figure);
 </tbody>
 </table>
 <p>これらと異なる解き方として、学習ベースの<strong>NCO</strong>（Neural Combinatorial Optimization）がある。</p>
-<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p></footer><span class="page-number">8 / 21</span></section><section class="slide section-slide" data-chapter="02" data-group="ニューラル組み合わせ最適化" data-section-start="true" id="ニューラル組み合わせ最適化"><h1>ニューラル組み合わせ最適化</h1>
-<span class="page-number">9 / 21</span></section><section class="slide" data-group="ニューラル組み合わせ最適化" data-section-start="false" id="nco"><h2>NCO：解き方を学習する</h2>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p></footer><span class="page-number">8 / 20</span></section><section class="slide section-slide" data-chapter="02" data-group="ニューラル組み合わせ最適化" data-section-start="true" id="ニューラル組み合わせ最適化"><h1>ニューラル組み合わせ最適化</h1>
+<span class="page-number">9 / 20</span></section><section class="slide" data-group="ニューラル組み合わせ最適化" data-section-start="false" id="nco"><h2>NCO：解き方を学習する</h2>
 <p>同じ種類の問題を大量に解かせて、解の作り方をモデルに学習させる。<br/>
 学習済みのモデルは、新しい問題に対して探索をやり直さずに解を構成する。</p>
 <div class="animation loaded"><iframe class="model-animation" srcdoc="&lt;!DOCTYPE html&gt;
@@ -408,23 +421,8 @@ import figure from 'data:text/javascript;base64,aW1wb3J0IHtzdmcsdGV4dCxsaW5lLEMs
 mount(figure);
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
 " tabindex="-1" title="学習と推論"></iframe></div>
-<span class="page-number">10 / 21</span></section><section class="slide" data-group="ニューラル組み合わせ最適化" data-section-start="false" id="ncoのメリット"><h2>NCOのメリット</h2>
-<p>学習した規則を、別の問題例にも利用できる。<span class="citation" data-cites="kool2019 kwon2020pomo">[5, 6]</span></p>
-<ul>
-<li>学習済みモデルで短時間に候補解を作れる</li>
-<li>複数の候補を作り、その中からよい解を選べる</li>
-<li><strong>質のよい初期解</strong>として、局所探索や他の解法と組み合わせる使い方も考えられる</li>
-</ul>
-<p>問題を解くたびの探索に加えて、事前の学習に計算を使う。</p>
-<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p><p>[6] Y.-D. Kwon ほか. POMO : Policy Optimization with Multiple Optima for Reinforcement Learning . Advances in Neural Information Processing Systems ( NeurIPS 2020) . 2020.</p></footer><span class="page-number">11 / 21</span></section><section class="slide" data-group="ニューラル組み合わせ最適化" data-section-start="false" id="ncoのデメリットと使いどころ"><h2>NCOのデメリットと使いどころ</h2>
-<ul>
-<li><strong>学習が大変</strong>：大量の問題例・計算資源・学習設定の調整が必要</li>
-<li>規模や分布が変わると、解の質が落ちることがある</li>
-<li>最適性の保証はなく、制約を守る仕組みも設計する必要がある <span class="citation" data-cites="kool2019 bopo2025">[5, 7]</span></li>
-</ul>
-<p>日々似た問題を繰り返し解く場面で使えると考えている。</p>
-<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">12 / 21</span></section><section class="slide section-slide" data-chapter="03" data-group="先行研究" data-section-start="true" id="先行研究"><h1>先行研究</h1>
-<span class="page-number">13 / 21</span></section><section class="slide figure-compact" data-group="先行研究" data-section-start="false" id="am-overview"><h2 class="figure-compact">Attention Model：概要</h2>
+<span class="page-number">10 / 20</span></section><section class="slide section-slide" data-chapter="03" data-group="先行研究" data-section-start="true" id="先行研究"><h1>先行研究</h1>
+<span class="page-number">11 / 20</span></section><section class="slide figure-compact" data-group="先行研究" data-section-start="false" id="am-overview"><h2 class="figure-compact">Attention Model：概要</h2>
 <p>構成型NCOの代表的なモデルであるAttention Model <span class="citation" data-cites="kool2019">[5]</span> を説明する。</p>
 <div class="lead">
 <p>問題インスタンス <span class="math inline"><em>x</em></span> から、行動 <span class="math inline"><em>y</em><sub><em>t</em></sub></span> を1つずつ選んで解 <span class="math inline"><em>y</em></span> を構成する。</p>
@@ -441,7 +439,7 @@ import figure from 'data:text/javascript;base64,aW1wb3J0IHtzdmcsdGV4dCxsaW5lLHJl
 mount(figure);
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
 " tabindex="-1" title="構成型NCOの処理"></iframe></div>
-<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p></footer><span class="page-number">14 / 21</span></section><section class="slide" data-group="先行研究" data-section-start="false" id="am-encoder"><h2>Attention Model：エンコーダー</h2>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p></footer><span class="page-number">12 / 20</span></section><section class="slide" data-group="先行研究" data-section-start="false" id="am-encoder"><h2>Attention Model：エンコーダー</h2>
 <div class="lead">
 <p>Attention Modelはエンコーダーとデコーダーの構成。<br/>
 エンコーダーでは各都市を1つのトークンとし、Transformer3層で埋め込みを作る。</p>
@@ -458,7 +456,7 @@ import figure from 'data:text/javascript;base64,aW1wb3J0IHtzdmcsdGV4dCxsaW5lLHJl
 mount(figure);
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
 " tabindex="-1" title="Attention Modelのエンコーダー"></iframe></div>
-<span class="page-number">15 / 21</span></section><section class="slide" data-group="先行研究" data-section-start="false" id="am-decoder"><h2>Attention Model：デコーダー</h2>
+<span class="page-number">13 / 20</span></section><section class="slide" data-group="先行研究" data-section-start="false" id="am-decoder"><h2>Attention Model：デコーダー</h2>
 <div class="lead">
 <p>現在の状態と埋め込みから文脈ベクトルを作り、埋め込みとの内積で次の都市を選ぶ。</p>
 </div>
@@ -474,7 +472,7 @@ import figure from 'data:text/javascript;base64,aW1wb3J0IHtzdmcsdGV4dCxsaW5lLEMs
 mount(figure);
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
 " tabindex="-1" title="Attention Modelのデコーダー"></iframe></div>
-<span class="page-number">16 / 21</span></section><section class="slide figure-short" data-group="先行研究" data-section-start="false" id="pomo"><h2 class="figure-short">学習の仕方　</h2>
+<span class="page-number">14 / 20</span></section><section class="slide figure-short" data-group="先行研究" data-section-start="false" id="pomo"><h2 class="figure-short">学習の仕方　</h2>
 <div class="lead">
 <p>TSPは、座標を回転・反転しても、出発点や巡回方向を変えても同じ最適解になる。POMOはこの対称性を利用して複数の経路を作る <span class="citation" data-cites="kwon2020pomo">[6]</span>。</p>
 </div>
@@ -491,8 +489,8 @@ mount(figure);
 &lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
 " tabindex="-1" title="POMOの学習と推論"></iframe></div>
 <p>学習時は複数経路の平均経路長を基準に更新する。 推論時は出発点を変えて複数の経路を作り、最も良かったものを採用する。回転・反転による8通りの入力拡張も用いる。</p>
-<footer class="citations"><p>[6] Y.-D. Kwon ほか. POMO : Policy Optimization with Multiple Optima for Reinforcement Learning . Advances in Neural Information Processing Systems ( NeurIPS 2020) . 2020.</p></footer><span class="page-number">17 / 21</span></section><section class="slide section-slide" data-chapter="04" data-group="実験結果" data-section-start="true" id="実験結果"><h1>実験結果</h1>
-<span class="page-number">18 / 21</span></section><section class="slide compact-table" data-group="実験結果" data-section-start="false" id="result-tsp"><h2 class="compact-table">先行研究の実験結果：TSP100</h2>
+<footer class="citations"><p>[6] Y.-D. Kwon ほか. POMO : Policy Optimization with Multiple Optima for Reinforcement Learning . Advances in Neural Information Processing Systems ( NeurIPS 2020) . 2020.</p></footer><span class="page-number">15 / 20</span></section><section class="slide section-slide" data-chapter="04" data-group="実験結果" data-section-start="true" id="実験結果"><h1>実験結果</h1>
+<span class="page-number">16 / 20</span></section><section class="slide compact-table" data-group="実験結果" data-section-start="false" id="result-tsp"><h2 class="compact-table">先行研究の実験結果：TSP100</h2>
 <p>最近のモデルは、TSPでは精度もかなり良くなっている。<span class="citation" data-cites="bopo2025">[7]</span></p>
 <table class="caption-top">
 <colgroup>
@@ -540,7 +538,28 @@ mount(figure);
 <p>BOPO：同じ問題で作った複数の候補解の優劣を使って学習する手法。</p>
 <p>一様分布から生成した100都市の問題1,000問（BOPO論文 Table 2）。時間は学習を除く合計。NCOは8通りの入力拡張を使用。TITAN Xp GPU・Xeon E5-2680 CPUを使用し、手法間で並列化条件も異なる。</p>
 </div>
-<footer class="citations"><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">19 / 21</span></section><section class="slide references-slide" data-group="参考文献" data-section-start="true"><h2>参考文献</h2><div class="csl-entry" id="ref-dantzig1954" role="listitem">
+<footer class="citations"><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">17 / 20</span></section><section class="slide" data-group="実験結果" data-section-start="false" id="summary"><h2>まとめ：NCOのメリット・デメリット</h2>
+<div class="columns summary-columns">
+<div class="column summary-benefits">
+<h3 id="メリット">メリット</h3>
+<ul>
+<li>学習済みモデルで<strong>短時間に候補解</strong>を作れる</li>
+<li>複数の候補を作り、その中からよい解を選べる</li>
+<li><strong>質のよい初期解</strong>として、局所探索や他の解法と組み合わせる使い方も考えられる <span class="citation" data-cites="kool2019 kwon2020pomo">[5, 6]</span></li>
+</ul>
+</div><div class="column summary-limitations">
+<h3 id="デメリット">デメリット</h3>
+<ul>
+<li><strong>学習が大変</strong>：大量の問題例・計算資源・学習設定の調整が必要</li>
+<li>規模や分布が変わると、解の質が落ちることがある</li>
+<li>最適性の保証はなく、制約を守る仕組みも設計する必要がある <span class="citation" data-cites="kool2019 bopo2025">[5, 7]</span></li>
+</ul>
+</div>
+</div>
+<div class="summary-takeaway">
+<p>日々似た問題を繰り返し解く場面で使えると考えている。</p>
+</div>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p><p>[6] Y.-D. Kwon ほか. POMO : Policy Optimization with Multiple Optima for Reinforcement Learning . Advances in Neural Information Processing Systems ( NeurIPS 2020) . 2020.</p><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">18 / 20</span></section><section class="slide references-slide" data-group="参考文献" data-section-start="true"><h2>参考文献</h2><div class="csl-entry" id="ref-dantzig1954" role="listitem">
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">G. Dantzig, R. Fulkerson, S. Johnson. <a href="https://doi.org/10.1287/opre.2.4.393">Solution of a Large-Scale Traveling-Salesman Problem</a>. <em>Journal of the Operations Research Society of America</em>. 1954.</div>
 </div><div class="csl-entry" id="ref-jobshop" role="listitem">
 <div class="csl-left-margin">[2] </div><div class="csl-right-inline">A. S. Manne. <a href="https://doi.org/10.1287/opre.8.2.219">On the Job-Shop Scheduling Problem</a>. <em>Operations Research</em>. 1960.</div>
@@ -550,11 +569,11 @@ mount(figure);
 <div class="csl-left-margin">[4] </div><div class="csl-right-inline">S. Lin, B. W. Kernighan. <a href="https://doi.org/10.1287/opre.21.2.498">An Effective Heuristic Algorithm for the Traveling-Salesman Problem</a>. <em>Operations Research</em>. 1973.</div>
 </div><div class="csl-entry" id="ref-kool2019" role="listitem">
 <div class="csl-left-margin">[5] </div><div class="csl-right-inline">W. Kool, H. van Hoof, M. Welling. <a href="https://arxiv.org/abs/1803.08475v3">Attention, Learn to Solve Routing Problems!</a> <em>International Conference on Learning Representations (<span>ICLR</span> 2019)</em>. 2019.</div>
-</div><span class="page-number">20 / 21</span></section><section class="slide references-slide" data-group="参考文献" data-section-start="false"><h2>参考文献（2）</h2><div class="csl-entry" id="ref-kwon2020pomo" role="listitem">
+</div><span class="page-number">19 / 20</span></section><section class="slide references-slide" data-group="参考文献" data-section-start="false"><h2>参考文献（2）</h2><div class="csl-entry" id="ref-kwon2020pomo" role="listitem">
 <div class="csl-left-margin">[6] </div><div class="csl-right-inline">Y.-D. Kwon ほか. <a href="https://proceedings.neurips.cc/paper_files/paper/2020/hash/f231f2107df69eab0a3862d50018a9b2-Abstract.html"><span>POMO</span>: Policy Optimization with Multiple Optima for Reinforcement Learning</a>. <em>Advances in Neural Information Processing Systems (<span>NeurIPS</span> 2020)</em>. 2020.</div>
 </div><div class="csl-entry" id="ref-bopo2025" role="listitem">
 <div class="csl-left-margin">[7] </div><div class="csl-right-inline">Z. Liao ほか. <a href="https://proceedings.mlr.press/v267/liao25a.html"><span>BOPO</span>: Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization</a>. <em>Proceedings of the 42nd International Conference on Machine Learning (<span>ICML</span> 2025)</em>. 2025.</div>
-</div><span class="page-number">21 / 21</span></section></main></div><nav aria-label="スライド操作" id="toolbar"><button aria-label="スライド一覧" id="menu">☰</button><button aria-label="全画面" id="fullscreen">⛶</button></nav><aside aria-label="スライド一覧" aria-modal="true" hidden="" id="overview" role="dialog"><button id="close">閉じる</button><p id="help">↑↓ ページ · ←→ step · 左右長押しで先頭／最後 · 画面左30%で戻る／それ以外で進む</p></aside><script>(() => {
+</div><span class="page-number">20 / 20</span></section></main></div><nav aria-label="スライド操作" id="toolbar"><button aria-label="スライド一覧" id="menu">☰</button><button aria-label="全画面" id="fullscreen">⛶</button></nav><aside aria-label="スライド一覧" aria-modal="true" hidden="" id="overview" role="dialog"><button id="close">閉じる</button><p id="help">↑↓ ページ · ←→ step · 左右長押しで先頭／最後 · 画面左30%で戻る／それ以外で進む</p></aside><script>(() => {
 const slides=[...document.querySelectorAll('.slide')], stage=document.querySelector('#stage'), overview=document.querySelector('#overview');
 let index=0, step=0, held=null, timer=null, long=false, lastInput=-Infinity;
 const frames=s=>[...s.querySelectorAll('iframe')];
