@@ -1,13 +1,13 @@
 (() => {
 const slides=[...document.querySelectorAll('.slide')], stage=document.querySelector('#stage'), overview=document.querySelector('#overview');
-let index=0, step=0, held=null, timer=null, long=false;
+let index=0, step=0, held=null, timer=null, long=false, lastInput=-Infinity;
 const frames=s=>[...s.querySelectorAll('iframe')];
 function maxStep(){return Math.max(0,...frames(slides[index]).map(f=>f.contentWindow.animation?.steps||0),...[...slides[index].querySelectorAll('[data-step]')].map(e=>Number(e.dataset.step)));}
-function paint(){slides.forEach((s,i)=>{s.classList.toggle('active',i===index);s.setAttribute('aria-hidden',String(i!==index));}); frames(slides[index]).forEach(f=>f.contentWindow.animation?.setStep(step));slides[index].querySelectorAll('[data-step]').forEach(e=>e.classList.toggle('pending',Number(e.dataset.step)>step)); history.replaceState(null,'',`#${index+1}/${step}`);}
-function go(i,n=0){index=Math.max(0,Math.min(slides.length-1,i));step=Math.max(0,Math.min(maxStep(),n));paint();}
-function move(dir){if(dir>0){step<maxStep()?go(index,step+1):go(index+1);}else{step>0?go(index,step-1):(index>0&&go(index-1,Infinity));}}
+function paint(animate=false){slides.forEach((s,i)=>{s.classList.toggle('active',i===index);s.setAttribute('aria-hidden',String(i!==index));frames(s).forEach(f=>f.contentWindow.animation?.setVisible?.(i===index));}); frames(slides[index]).forEach(f=>f.contentWindow.animation?.setStep(step,animate));slides[index].querySelectorAll('[data-step]').forEach(e=>e.classList.toggle('pending',Number(e.dataset.step)>step)); history.replaceState(null,'',`#${index+1}/${step}`);}
+function go(i,n=0,animate=false){index=Math.max(0,Math.min(slides.length-1,i));step=Math.max(0,Math.min(maxStep(),n));paint(animate);}
+function move(dir){const now=performance.now(),animate=now-lastInput>300;lastInput=now;if(dir>0){step<maxStep()?go(index,step+1,animate):go(index+1);}else{step>0?go(index,step-1,animate):(index>0&&go(index-1,Infinity));}}
 function jump(dir){go(index,dir>0?Infinity:0);}
-function resize(){let scale=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform=`scale(${scale})`;stage.style.left=`${(innerWidth-1280*scale)/2}px`;stage.style.top=`${(innerHeight-720*scale)/2}px`;}
+function resize(){let scale=Math.min(innerWidth/1280,innerHeight/720)*.95;stage.style.transform=`scale(${scale})`;stage.style.left=`${(innerWidth-1280*scale)/2}px`;stage.style.top=`${(innerHeight-720*scale)/2}px`;}
 function close(){overview.hidden=true;document.querySelector('#menu').focus();}
 function menu(){overview.hidden=false;overview.querySelectorAll('.thumb').forEach((b,i)=>b.setAttribute('aria-current',String(i===index)));overview.querySelector('#close').focus();}
 const grouped=slides.some(s=>s.dataset.sectionStart==='true');

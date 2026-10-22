@@ -52,6 +52,7 @@ End.
         page=self.page();page.click('#menu')
         self.assertEqual(page.locator('.overview-grid').count(),1)
         self.assertEqual(page.locator('.thumb').count(),3)
+        self.assertEqual(page.locator('.references-slide').count(),0)
         self.assertEqual(len(page.locator('.overview-grid').evaluate('e=>getComputedStyle(e).gridTemplateColumns.split(" ")')),4)
         self.assertTrue(page.locator('img').get_attribute('src').startswith('data:image/svg+xml'))
         self.assertTrue(page.locator('img').evaluate('e=>e.complete&&e.naturalWidth>0'))
@@ -90,6 +91,57 @@ End.
             page.wait_for_function('deck.step === 0')
             page.locator('#menu').tap();self.assertTrue(page.locator('#overview').is_visible())
         finally:browser.close()
+
+    def test_bibliography_default_and_explicit_heading(self):
+        from bs4 import BeautifulSoup
+        name='bibliography-test'
+        folder=ROOT/'decks'/name
+        self.assertFalse(folder.exists())
+        slides.create_deck(argparse.Namespace(name=name,source=None))
+        try:
+            (folder/'reference.bib').write_text('\n'.join('@book{r%d, author={Writer, A}, title={Book %d}, year={2020}}'%(i,i) for i in range(7)))
+            source='## Content\n\n'+ '; '.join('[@r%d]'%i for i in range(7))+'\n'
+            for heading in ('','\n## 参考文献 {#references}\n'):
+                (folder/'slides.qmd').write_text(source+heading)
+                doc=BeautifulSoup(slides.render(name).read_text(),'html.parser')
+                self.assertEqual(len(doc.select('.references-slide')),2)
+                self.assertEqual(len(doc.select('.references-slide .csl-entry')),7)
+                self.assertEqual(len(doc.select('.slide')),3)
+                self.assertEqual(len(doc.select('.citations p')),7)
+        finally:
+            shutil.rmtree(folder);shutil.rmtree(ROOT/'.build'/name,ignore_errors=True)
+            (ROOT/'output'/f'{name}.html').unlink(missing_ok=True)
+
+    def test_retained_svg_animation(self):
+        page=self.browser.new_page()
+        page.goto((ROOT/'output/nco-intro.html').as_uri());page.wait_for_function('window.deckReady')
+        page.evaluate("deck.go([...document.querySelectorAll('.slide')].findIndex(s=>s.id==='background'))")
+        frame=page.locator('#background iframe').content_frame
+        frame.locator('svg').evaluate('e=>window.originalSvg=e')
+        before=frame.locator('svg').inner_html()
+        frame.locator('svg').evaluate('()=>{window.animation.setStep(1,true)}')
+        page.wait_for_timeout(120)
+        intermediate=frame.locator('svg').inner_html()
+        frame.locator('svg').evaluate('async()=>await window.animation.settled')
+        final=frame.locator('svg').inner_html()
+        self.assertNotEqual(before,intermediate);self.assertNotEqual(intermediate,final)
+        self.assertTrue(frame.locator('svg').evaluate('e=>e===window.originalSvg'))
+        page.close()
+
+    def test_footer_number_is_above_rule(self):
+        page=self.browser.new_page(viewport={'width':1280,'height':720})
+        page.goto((ROOT/'output/nco-intro.html').as_uri());page.wait_for_function('window.deckReady')
+        for i in range(page.evaluate('deck.count')):
+            page.evaluate('(i)=>deck.go(i)',i)
+            gap=page.evaluate("""() => {
+                const s=document.querySelector('.slide.active'),r=s.getBoundingClientRect(),scale=r.width/1280;
+                const line=r.bottom-parseFloat(getComputedStyle(s,'::after').bottom)*scale;
+                return line-s.querySelector('.page-number').getBoundingClientRect().bottom;
+            }""")
+            self.assertGreater(gap,6)
+        page.emulate_media(media='print');page.evaluate("document.body.classList.add('export');deck.go(2)")
+        self.assertTrue(page.locator('#background iframe').is_visible())
+        page.close()
 
     def test_missing_resource_fails(self):
         from bs4 import BeautifulSoup

@@ -85,11 +85,11 @@ registerAnimation({
 
 共有 `frame.js` を読み込む雛形が自動生成されます。親プレイヤーがstepを管理し、複数iframeは同時進行、短い図は最終stepで止まります。自動再生タイマーは使わず、最終状態を確定させてください。本文も `<div data-step="1">…</div>` で段階表示できます。
 
-画像・CSS・通常のJS・iframeはビルド時に内包します。外部CDN・CSSの `@import`・`srcset` は使いません。動的fetchやES moduleの外部importも避け、必要なデータをローカルへ用意します。コードセルを実行する構成は雛形に含みません。
+画像・CSS・通常のJS・iframeはビルド時に内包します。外部CDN・CSSの `@import`・`srcset` は使いません。静的なローカルES moduleのimportはPythonで内包します。動的fetchや外部importは避け、必要なデータをローカルへ用意します。コードセルを実行する構成は雛形に含みません。
 
 ## 引用
 
-`reference.bib`に文献を登録し、QMDで `[@key]` と書くと本文は `[1]`、同じページの下端には小さな書誌情報が入ります。引用が多すぎるページは分割してください。最終ページに巨大な文献一覧を作る必要はありません。
+`reference.bib`に文献を登録し、QMDで `[@key]` と書くと本文は `[1]`、同じページの下端には小さな書誌情報が入ります。引用が多すぎるページは分割してください。引用が1件でもある場合、末尾に参考文献ページを自動生成します。QMDでは `## 参考文献 {#references}` と書くとその見出しを展開し、省略しても自動で補完します。引用済み文献を5件ずつ掲載し、ページ内フッターも残します。
 
 ## 操作
 
@@ -120,3 +120,6 @@ uv run python -m unittest discover -s tests
 制作ルールは [AGENTS.md](AGENTS.md)、最小限のAIスキルは [.agents/skills/quarto-slides/SKILL.md](.agents/skills/quarto-slides/SKILL.md) にあります。
 
 検証環境：Quarto 1.8.26、Python 3.13、Playwright Chromium / WebKit。iPhone 13相当のエミュレーションでタップと一覧を確認済みです。実機での確認は別途必要です。
+
+
+例の図・本文・青い見出し帯は20261014を基準にしています。`html/shared/motion.mjs`が元のSVG要素を保持して補間し、`runtime.mjs`のアダプターがプレイヤーへ接続します。図の停止点・中間の遷移・時間は元の定義を使用します。`shared/original-slides.css`が元の見た目、`player-layout.css`がプレイヤーとの接続部分です。
