@@ -149,6 +149,41 @@ End.
         page.evaluate('(id)=>deck.go([...document.querySelectorAll(".slide")].findIndex(s=>s.id===id))',slide_id)
         return page
 
+    def test_learning_model_transfer_and_route_timing(self):
+        page=self.example_page('nco')
+        frame=page.locator('#nco iframe').element_handle().content_frame()
+        self.assertEqual(frame.locator('[data-key="model-inf"]').count(),0)
+        self.assertEqual(frame.locator('[data-key="answer"]').count(),0)
+        self.assertEqual(frame.locator('[data-key="train-0-e0"]').count(),0)
+        frame.evaluate('animation.setStep(1,false)')
+        timing=frame.evaluate("""async()=>{
+          const samples=[];let done=false;
+          animation.setStep(2,true).then(()=>done=true);
+          while(!done){samples.push([
+            !!document.querySelector('[data-key="arrow-make"]'),
+            !!document.querySelector('[data-key="train-0-e0"]')]);
+            await new Promise(requestAnimationFrame);}
+          return samples;
+        }""")
+        self.assertTrue(all(a==b for a,b in timing))
+        frame.evaluate('animation.setStep(3,false)')
+        positions=frame.evaluate("""async()=>{
+          const samples=[];let done=false;
+          animation.setStep(4,true).then(()=>done=true);
+          while(!done){const g=document.querySelector('[data-key="model-inf"]');
+            if(g){const m=g.transform.baseVal.consolidate().matrix;samples.push([m.e,m.f]);}
+            await new Promise(requestAnimationFrame);}
+          return samples;
+        }""")
+        self.assertTrue(any(210<x<770 and abs(y-330)<.1 for x,y in positions))
+        self.assertTrue(any(abs(x-780)<.1 and 195<y<325 for x,y in positions))
+        self.assertTrue(all(abs(y-330)<.1 or abs(x-780)<.1 for x,y in positions))
+        frame.evaluate('animation.setStep(6,false)')
+        self.assertGreater(frame.locator('[data-key="answer"] line').count(),0)
+        frame.evaluate('animation.setStep(0,false)')
+        self.assertEqual(frame.locator('[data-key="model-inf"]').count(),0)
+        page.close()
+
     def test_processing_labels_stay_opaque_during_motion(self):
         page=self.example_page('background')
         result=page.locator('#background iframe').content_frame.locator('svg').evaluate("""async () => {
