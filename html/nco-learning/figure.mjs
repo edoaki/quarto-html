@@ -11,7 +11,7 @@ const r0=rng(7);
 export const train=[...Array(4)].map(()=>{const P=spread(r0);return {P,route:sample(P,r0)};}).map(t=>({...t,length:tourLength(t.P,t.route)}));
 export const query=tspCases[0].cities;
 export const answer=optimalTour(query,0);
-const steps=['問題の配置を用意する','配置をモデルへ渡す','経路を作り、経路長を計算する','経路長を使ってモデルを更新する','学習済みモデルを移し、新しい配置から経路を出力する'];
+const steps=['問題の配置を用意する','配置をモデルへ渡し、経路と経路長を出力する','経路長を使ってモデルを更新する','学習済みモデルを移し、新しい配置から経路を出力する'];
 
 // 小さな地図。route を count 本まで描く。
 function thumb(key,P,{x,y,s=100,route=null,count=n,opacity=1,start=true}){
@@ -68,14 +68,14 @@ function scene(k,{pulse=0,length=true,transfer=null,inputLeg=false}={}){
  return svg(s,'配置から経路を作り、経路長を使ってモデルを更新する。学習済みモデルを移して、新しい配置から経路を作る');
 }
 const f=(k,options={},duration=450)=>({markup:scene(k,options),duration});
-const work=k=>[1,2,3,1,2,3,0].map(pulse=>f(k,{pulse},170));
+// 経路生成は左→右、学習の更新は逆向きの右→左に点を動かす。
+const work=k=>(k===3?[3,2,1,3,2,1,0]:[1,2,3,1,2,3,0]).map(pulse=>f(k,{pulse},170));
 export default {id:'F24',title:'NCOの学習と推論',steps,
- renderStep(k){return scene(k===4?6:k);},
+ renderStep(k){return scene([0,2,3,6][k]);},
  transition(from,to){if(to!==from+1)return null;
-  if(to===1)return [f(1,{inputLeg:true},350),f(1,{},350),...work(1)];
-  // 全ての経路を同時に描く。自己回帰の都市選択としては描かない。
-  if(to===2)return [f(2,{length:false},850),f(2,{},450)];
-  if(to===3)return [f(3,{},650),...work(3)];
+  // 入力・計算から全経路と経路長の出力まで、1回のstepで続ける。
+  if(to===1)return [f(1,{inputLeg:true},350),f(1,{},350),...work(1),f(2,{length:false},850),f(2,{},450)];
+  if(to===2)return [f(3,{},650),...work(3)];
   // 同じモデルの位置を補間し、必ず右へ進んでから上へ移す。
-  if(to===4)return [f(4,{transfer:'start'},0),f(4,{transfer:'right'},850),f(4,{},700),f(5,{},500),...work(5),f(6,{},850)];
+  if(to===3)return [f(4,{transfer:'start'},0),f(4,{transfer:'right'},850),f(4,{},700),f(5,{},500),...work(5),f(6,{},850)];
   return null;}};

@@ -155,10 +155,10 @@ End.
         self.assertEqual(frame.locator('[data-key="model-inf"]').count(),0)
         self.assertEqual(frame.locator('[data-key="answer"]').count(),0)
         self.assertEqual(frame.locator('[data-key="train-0-e0"]').count(),0)
-        frame.evaluate('animation.setStep(1,false)')
+        frame.evaluate('animation.setStep(0,false)')
         timing=frame.evaluate("""async()=>{
           const samples=[];let done=false;
-          animation.setStep(2,true).then(()=>done=true);
+          animation.setStep(1,true).then(()=>done=true);
           while(!done){samples.push([
             !!document.querySelector('[data-key="arrow-make"]'),
             !!document.querySelector('[data-key="train-0-e0"]')]);
@@ -166,10 +166,23 @@ End.
           return samples;
         }""")
         self.assertTrue(all(a==b for a,b in timing))
-        frame.evaluate('animation.setStep(3,false)')
+        self.assertTrue(any(a and b for a,b in timing))
+        self.assertEqual(frame.locator('[data-key="train-len-0"]').count(),1)
+        update_order=frame.evaluate("""async()=>{
+          const order=[];let done=false;
+          animation.setStep(2,true).then(()=>done=true);
+          while(!done){
+            const dots=[...document.querySelectorAll('[data-key="model"] circle')];
+            const i=dots.findIndex(dot=>+dot.getAttribute('r')>5.8);
+            if(i>=0 && order.at(-1)!==i)order.push(i);
+            await new Promise(requestAnimationFrame);
+          }
+          return order;
+        }""")
+        self.assertEqual(update_order,[2,1,0,2,1,0])
         positions=frame.evaluate("""async()=>{
           const samples=[];let done=false;
-          animation.setStep(4,true).then(()=>done=true);
+          animation.setStep(3,true).then(()=>done=true);
           while(!done){const g=document.querySelector('[data-key="model-inf"]');
             if(g){const m=g.transform.baseVal.consolidate().matrix;samples.push([m.e,m.f]);}
             for(const key of ['arrow-in','arrow-out']){
@@ -184,8 +197,8 @@ End.
         self.assertTrue(any(210<x<770 and abs(y-330)<.1 for x,y in positions))
         self.assertTrue(any(abs(x-780)<.1 and 195<y<325 for x,y in positions))
         self.assertTrue(all(abs(y-330)<.1 or abs(x-780)<.1 for x,y in positions))
-        self.assertEqual(frame.evaluate('animation.step'),4)
-        self.assertEqual(frame.evaluate('animation.steps'),4)
+        self.assertEqual(frame.evaluate('animation.step'),3)
+        self.assertEqual(frame.evaluate('animation.steps'),3)
         self.assertGreater(frame.locator('[data-key="answer"] line').count(),0)
         frame.evaluate('animation.setStep(0,false)')
         self.assertEqual(frame.locator('[data-key="model-inf"]').count(),0)
