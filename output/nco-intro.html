@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>機械学習を使った組み合わせ最適化</title><style>:root {color-scheme:light; --ink:#182b3a; --accent:#007d88; --muted:#546572}
+* {box-sizing:border-box} body {margin:0; background:#17232d; color:var(--ink); font-family:'Hiragino Sans','Yu Gothic',sans-serif}
+#stage {position:fixed; width:1280px; height:720px; transform-origin:top left; background:#fcfcf9}
+.slide {position:absolute; inset:0; padding:48px 64px 94px; display:none; overflow:hidden; background:#fcfcf9}
+.slide.active {display:block} h1,h2,h3,p {margin:0} h2 {font-size:38px; line-height:1.35; margin-bottom:28px; border-bottom:3px solid var(--accent); padding-bottom:14px} h1 {font-size:62px} h3 {font-size:28px; margin:22px 0 12px} p,li {font-size:27px; line-height:1.65} p {margin:14px 0} li {margin:12px 0} ul {padding-left:1.2em} strong {color:var(--accent)}
+.slide.cover,.slide.section-slide {padding-top:190px} .cover h2 {border:0; font-size:48px; line-height:1.55} .cover p {color:var(--muted)} .section-slide {background:#e9f2f1} .section-slide h1::before {content:''; display:block; width:70px; height:6px; background:var(--accent); margin-bottom:32px}
+iframe {width:100%; height:350px; border:0; display:block; margin:12px 0; pointer-events:none} .columns {display:flex; gap:48px}.column {flex:1; min-width:0} table {border-collapse:collapse; width:100%; font-size:25px; margin:24px 0} th,td {padding:15px 18px; border-bottom:1px solid #b9c9cd; text-align:left} th {background:#e9f2f1} a {color:inherit} .citation {font-size:.65em; color:var(--muted)}
+.citations {position:absolute; bottom:24px; left:64px; right:90px; font-size:12px; line-height:1.45; color:#53616a; border-top:1px solid #c8d2d4; padding-top:8px}.citations p {font-size:inherit; line-height:inherit; margin:0}.small p,.small {font-size:21px} .page-number {position:absolute; right:30px; bottom:25px; font-size:14px; color:#53616a}
+#toolbar {position:fixed; right:12px; top:12px; display:flex; gap:6px; z-index:5} button {font:inherit; cursor:pointer; border:1px solid #c1cbcf; background:#fff; color:#182b3a; border-radius:6px; padding:10px 14px} button:focus-visible {outline:3px solid #00a2af} #overview {position:fixed; inset:0; z-index:10; overflow:auto; padding:25px; background:#e7ecee} #overview[hidden] {display:none} #overview h2 {font-size:24px; border:0; margin:22px 0 12px} .overview-row {display:flex; gap:12px; overflow-x:auto; padding:6px 2px 14px}.overview-grid {display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px}.thumb {text-align:left; min-width:220px; flex:0 0 260px; height:135px; padding:20px; font-size:18px; border-top:5px solid var(--accent)} .thumb span {display:block; font-size:12px; color:#53616a; margin-bottom:10px}.thumb[aria-current=true] {background:#d7eeeb}
+[data-step].pending {visibility:hidden} #help {color:#53616a; font-size:14px} @media(max-width:600px) {#toolbar button {padding:9px 12px} #overview {padding:16px}.overview-grid {grid-template-columns:repeat(4,220px);overflow:auto} .thumb{flex-basis:220px}}
+body.export #toolbar {display:none} body.export #stage {left:0!important;top:0!important;transform:none!important}
+
+/* この発表だけのスタイル */
+</style></head><body><main id="stage"><section class="slide cover" data-group="" data-section-start="false"><h2 class="cover" id="機械学習を使った組み合わせ最適化-ニューラル組み合わせ最適化の紹介">機械学習を使った組み合わせ最適化<br/>ニューラル組み合わせ最適化の紹介</h2>
+<span class="page-number">1 / 18</span></section><section class="slide section-slide" data-group="研究背景" data-section-start="true"><h1 id="研究背景">研究背景</h1>
+<span class="page-number">2 / 18</span></section><section class="slide" data-group="研究背景" data-section-start="false"><h2 id="社会にある順番を決める問題">社会にある「順番を決める」問題</h2>
+<p>制約を満たす組合せから、目的に合うものを選ぶ。<span class="citation" data-cites="dantzig1954 jobshop">[1, 2]</span></p>
+<iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ja&quot;&gt;&lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;style&gt;body{margin:0;color:#182b3a;font:20px 'Hiragino Sans','Yu Gothic',sans-serif}svg{width:100%;height:350px;display:block}text{fill:#182b3a}.heading{font-size:25px;font-weight:bold}.caption{font-size:19px}.route{fill:none;stroke:#007d88;stroke-width:4}.grid{fill:none;stroke:#c8d4d8;stroke-width:1}&lt;/style&gt;
+&lt;svg aria-label=&quot;配送経路と3機械の加工順&quot; role=&quot;img&quot; viewbox=&quot;0 0 1152 350&quot;&gt;
+&lt;text class=&quot;heading&quot; x=&quot;18&quot; y=&quot;30&quot;&gt;配送経路&lt;/text&gt;&lt;text class=&quot;heading&quot; x=&quot;610&quot; y=&quot;30&quot;&gt;加工順（ジョブショップ）&lt;/text&gt;
+&lt;rect fill=&quot;#edf3f2&quot; height=&quot;205&quot; rx=&quot;5&quot; width=&quot;500&quot; x=&quot;18&quot; y=&quot;48&quot;&gt;&lt;/rect&gt;&lt;g id=&quot;route&quot;&gt;&lt;/g&gt;&lt;g id=&quot;homes&quot;&gt;&lt;/g&gt;
+&lt;rect fill=&quot;#007d88&quot; height=&quot;30&quot; width=&quot;35&quot; x=&quot;45&quot; y=&quot;130&quot;&gt;&lt;/rect&gt;&lt;path d=&quot;M40 130 L62 113 L85 130Z&quot; fill=&quot;#007d88&quot;&gt;&lt;/path&gt;&lt;text x=&quot;35&quot; y=&quot;185&quot;&gt;倉庫&lt;/text&gt;
+&lt;g class=&quot;grid&quot;&gt;&lt;path d=&quot;M652 64V237H1110M652 120H1110M652 175H1110&quot;&gt;&lt;/path&gt;&lt;/g&gt;
+&lt;text x=&quot;613&quot; y=&quot;104&quot;&gt;A&lt;/text&gt;&lt;text x=&quot;613&quot; y=&quot;158&quot;&gt;B&lt;/text&gt;&lt;text x=&quot;613&quot; y=&quot;213&quot;&gt;C&lt;/text&gt;
+&lt;text x=&quot;650&quot; y=&quot;259&quot;&gt;0&lt;/text&gt;&lt;text x=&quot;880&quot; y=&quot;259&quot;&gt;5&lt;/text&gt;&lt;text x=&quot;1070&quot; y=&quot;259&quot;&gt;時間 →&lt;/text&gt;&lt;g id=&quot;jobs&quot;&gt;&lt;/g&gt;
+&lt;text class=&quot;caption&quot; x=&quot;18&quot; y=&quot;282&quot;&gt;決めるもの：訪問する順番&lt;/text&gt;&lt;text class=&quot;caption&quot; x=&quot;18&quot; y=&quot;311&quot;&gt;制約：すべての配送先を訪れる&lt;/text&gt;&lt;text class=&quot;caption&quot; x=&quot;18&quot; y=&quot;340&quot;&gt;目的：移動距離を短くする&lt;/text&gt;
+&lt;text class=&quot;caption&quot; x=&quot;610&quot; y=&quot;282&quot;&gt;決めるもの：各作業の開始時刻&lt;/text&gt;&lt;text class=&quot;caption&quot; x=&quot;610&quot; y=&quot;311&quot;&gt;制約：工程順・同じ機械の同時使用禁止&lt;/text&gt;&lt;text class=&quot;caption&quot; x=&quot;610&quot; y=&quot;340&quot;&gt;目的：すべての製品を早く完成させる&lt;/text&gt;
+&lt;/svg&gt;&lt;script&gt;/* Each animation implements render(step); the parent owns all navigation. */
+window.registerAnimation = ({steps, render}) =&gt; {
+  if (!Number.isInteger(steps) || steps &lt; 0) throw Error('steps must be a nonnegative integer');
+  window.animation = {steps, step: 0, setStep(n) {
+    this.step = Math.max(0, Math.min(steps, n));
+    render(this.step);
+    document.documentElement.dataset.step = this.step;
+  }};
+  window.animation.setStep(0);
+};
+&lt;/script&gt;&lt;script&gt;
+const pts=[[62,143],[160,83],[300,88],[460,130],[345,205],[160,213],[62,143]];
+document.querySelector('#homes').innerHTML=pts.slice(1,-1).map(([x,y],i)=&gt;`&lt;path d=&quot;M${x-13} ${y}v18h26v-18l-13-13Z&quot; fill=&quot;#9bbab6&quot;/&gt;&lt;text x=&quot;${x+20}&quot; y=&quot;${y+17}&quot;&gt;${i+1}&lt;/text&gt;`).join('');
+// [machine, start, duration, product]; each product obeys precedence, machines never overlap.
+const jobs=[[0,0,2,0],[1,0,3,1],[2,0,2,2],[0,2,2,2],[2,3,1,1],[1,3,2,0],[0,4,2,1],[1,5,3,2],[2,5,2,0]];
+const colors=['#007d88','#b66a3e','#7471b0'];
+registerAnimation({steps:6,render(step){document.querySelector('#route').innerHTML=pts.slice(0,step).map((a,i)=&gt;`&lt;path class=&quot;route&quot; d=&quot;M${a} L${pts[i+1]}&quot;/&gt;`).join('');document.querySelector('#jobs').innerHTML=jobs.slice(0,Math.ceil(step*1.5)).map(([m,t,d,j])=&gt;`&lt;rect x=&quot;${654+t*48}&quot; y=&quot;${72+m*55}&quot; width=&quot;${d*48-4}&quot; height=&quot;37&quot; rx=&quot;3&quot; fill=&quot;${colors[j]}&quot;/&gt;&lt;text x=&quot;${662+t*48}&quot; y=&quot;${98+m*55}&quot; style=&quot;fill:white;font-size:17px&quot;&gt;${d===1?'②':'製品'+(j+1)}&lt;/text&gt;`).join('');}});
+&lt;/script&gt;&lt;/html&gt;
+" tabindex="-1" title="配送経路と加工順">
+</iframe>
+<footer class="citations"><p>[1] G. Dantzig, R. Fulkerson, S. Johnson. Solution of a Large-Scale Traveling-Salesman Problem . Journal of the Operations Research Society of America . 1954.</p><p>[2] Google. The Job Shop Problem .</p></footer><span class="page-number">3 / 18</span></section><section class="slide" data-group="研究背景" data-section-start="false"><h2 id="巡回セールスマン問題tsp">巡回セールスマン問題（TSP）</h2>
+<p>すべての都市を1回ずつ訪問し、出発点に戻る<strong>最短の経路</strong>を探す。<span class="citation" data-cites="dantzig1954">[1]</span></p>
+<ul>
+<li>決めるもの：都市を訪問する順番</li>
+<li>制約：各都市を1回ずつ訪問し、1つの巡回路を作る</li>
+<li>目的：経路全体の距離を最小にする</li>
+</ul>
+<p>対称な距離の場合、出発点と逆順の重複を除いても候補は <strong>(n − 1)! / 2</strong> 通り。</p>
+<footer class="citations"><p>[1] G. Dantzig, R. Fulkerson, S. Johnson. Solution of a Large-Scale Traveling-Salesman Problem . Journal of the Operations Research Society of America . 1954.</p></footer><span class="page-number">4 / 18</span></section><section class="slide" data-group="研究背景" data-section-start="false"><h2 id="数理最適化による解法">数理最適化による解法</h2>
+<p>変数・制約・目的関数で問題を表し、探索と緩和を組み合わせる。<span class="citation" data-cites="dantzig1954 gurobi">[1, 3]</span></p>
+<ul>
+<li>よい実行可能解と、最適値の下界を更新する</li>
+<li>両者の差が閉じれば、許容誤差の範囲で最適性を証明できる</li>
+<li>制約を明示できる一方、定式化や探索に工夫が必要</li>
+</ul>
+<p>時間制限内に最適性まで証明できるとは限らない。</p>
+<footer class="citations"><p>[1] G. Dantzig, R. Fulkerson, S. Johnson. Solution of a Large-Scale Traveling-Salesman Problem . Journal of the Operations Research Society of America . 1954.</p><p>[3] Gurobi Optimization. Objectives: Optimizer Reference Manual .</p></footer><span class="page-number">5 / 18</span></section><section class="slide" data-group="研究背景" data-section-start="false"><h2 id="ヒューリスティクスと局所探索">ヒューリスティクスと局所探索</h2>
+<p>手順を設計して解を作り、経路の一部をつなぎ替えて改善する。<span class="citation" data-cites="lin1973">[4]</span></p>
+<div class="columns">
+<div class="column">
+<h3 id="解を作る">解を作る</h3>
+<p>最近傍法：今いる都市から、最も近い未訪問の都市へ進む。</p>
+<p>短時間で解を作れるが、先の選択まで考えるとは限らない。</p>
+</div><div class="column">
+<h3 id="解を改善する">解を改善する</h3>
+<p>2-opt：2本の辺をつなぎ替え、短くなる変更を採用する。</p>
+<p>初期解や探索の近傍によって、得られる解が変わる。</p>
+</div>
+</div>
+<footer class="citations"><p>[4] S. Lin, B. W. Kernighan. An Effective Heuristic Algorithm for the Traveling-Salesman Problem . Operations Research . 1973.</p></footer><span class="page-number">6 / 18</span></section><section class="slide section-slide" data-group="ニューラル組み合わせ最適化" data-section-start="true"><h1 id="ニューラル組み合わせ最適化">ニューラル組み合わせ最適化</h1>
+<span class="page-number">7 / 18</span></section><section class="slide" data-group="ニューラル組み合わせ最適化" data-section-start="false"><h2 id="nco解の作り方を学習する">NCO：解の作り方を学習する</h2>
+<p>多くの問題例から、よい解を作る規則をモデルに学習させる。<span class="citation" data-cites="kool2019">[5]</span></p>
+<ul>
+<li><strong>学習時</strong>：問題を解く → 解の質を評価する → モデルを更新する</li>
+<li><strong>利用時</strong>：新しい問題を入力し、学習済みモデルで解を作る</li>
+<li>解を順番に構成する方法のほか、既存の解を改善する方法もある</li>
+</ul>
+<p>ここでは、都市を1つずつ選ぶ<strong>構成型モデル</strong>を紹介する。</p>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p></footer><span class="page-number">8 / 18</span></section><section class="slide" data-group="ニューラル組み合わせ最適化" data-section-start="false"><h2 id="ncoのメリット">NCOのメリット</h2>
+<p>学習した規則を、別の問題例にも利用できる。<span class="citation" data-cites="kool2019 kwon2020pomo">[5, 6]</span></p>
+<ul>
+<li>学習済みモデルで短時間に候補解を作れる</li>
+<li>複数の候補を作り、その中からよい解を選べる</li>
+<li><strong>質のよい初期解</strong>として、局所探索や他の解法と組み合わせる使い方も考えられる</li>
+</ul>
+<p>問題を解くたびの探索に加えて、事前の学習に計算を使う。</p>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p><p>[6] Y.-D. Kwon ほか. POMO : Policy Optimization with Multiple Optima for Reinforcement Learning . Advances in Neural Information Processing Systems ( NeurIPS 2020) . 2020.</p></footer><span class="page-number">9 / 18</span></section><section class="slide" data-group="ニューラル組み合わせ最適化" data-section-start="false"><h2 id="ncoのデメリットと使いどころ">NCOのデメリットと使いどころ</h2>
+<ul>
+<li><strong>学習が大変</strong>：大量の問題例・計算資源・学習設定の調整が必要</li>
+<li>規模や分布が変わると、解の質が落ちることがある</li>
+<li>最適性の保証はなく、制約を守る仕組みも設計する必要がある <span class="citation" data-cites="kool2019 bopo2025">[5, 7]</span></li>
+</ul>
+<p>日々似た問題を繰り返し解く場面で使えると考えている。</p>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">10 / 18</span></section><section class="slide section-slide" data-group="先行研究" data-section-start="true"><h1 id="先行研究">先行研究</h1>
+<span class="page-number">11 / 18</span></section><section class="slide" data-group="先行研究" data-section-start="false"><h2 id="attention-model全体の流れ">Attention Model：全体の流れ</h2>
+<p>エンコーダーで都市の関係を表現し、デコーダーで訪問先を選ぶ。<span class="citation" data-cites="kool2019">[5]</span></p>
+<iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ja&quot;&gt;&lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;style&gt;body{margin:0;font:23px 'Hiragino Sans','Yu Gothic',sans-serif;color:#182b3a}svg{width:100%;height:350px}text{fill:#182b3a}.hidden{visibility:hidden}.edge{stroke:#a2bfbc;stroke-width:2}.path{stroke:#007d88;stroke-width:5;fill:none}&lt;/style&gt;
+&lt;svg aria-label=&quot;都市の座標から埋め込みを作り、訪問先を逐次選択する&quot; role=&quot;img&quot; viewbox=&quot;0 0 1152 350&quot;&gt;
+&lt;text x=&quot;15&quot; y=&quot;35&quot;&gt;都市の座標&lt;/text&gt;&lt;text x=&quot;370&quot; y=&quot;35&quot;&gt;エンコーダー&lt;/text&gt;&lt;text x=&quot;785&quot; y=&quot;35&quot;&gt;デコーダー&lt;/text&gt;
+&lt;g id=&quot;input&quot;&gt;&lt;/g&gt;&lt;text font-size=&quot;42&quot; x=&quot;275&quot; y=&quot;165&quot;&gt;→&lt;/text&gt;&lt;g id=&quot;encoder&quot;&gt;&lt;g id=&quot;edges&quot;&gt;&lt;/g&gt;&lt;g id=&quot;tokens&quot;&gt;&lt;/g&gt;&lt;/g&gt;
+&lt;text font-size=&quot;42&quot; x=&quot;690&quot; y=&quot;165&quot;&gt;→&lt;/text&gt;&lt;path class=&quot;path&quot; id=&quot;path&quot;&gt;&lt;/path&gt;&lt;g id=&quot;output&quot;&gt;&lt;/g&gt;
+&lt;text x=&quot;15&quot; y=&quot;317&quot;&gt;座標をトークンに変換&lt;/text&gt;&lt;text x=&quot;365&quot; y=&quot;317&quot;&gt;都市同士の関係を埋め込む&lt;/text&gt;&lt;text x=&quot;785&quot; y=&quot;317&quot;&gt;未訪問の都市から選ぶ&lt;/text&gt;
+&lt;/svg&gt;&lt;script&gt;/* Each animation implements render(step); the parent owns all navigation. */
+window.registerAnimation = ({steps, render}) =&gt; {
+  if (!Number.isInteger(steps) || steps &lt; 0) throw Error('steps must be a nonnegative integer');
+  window.animation = {steps, step: 0, setStep(n) {
+    this.step = Math.max(0, Math.min(steps, n));
+    render(this.step);
+    document.documentElement.dataset.step = this.step;
+  }};
+  window.animation.setStep(0);
+};
+&lt;/script&gt;&lt;script&gt;
+const points=[[35,125],[160,85],[220,200],[90,240]],seq=[0,1,2,3,0];
+function nodes(dx,active){return points.map(([x,y],i)=&gt;`&lt;circle cx=&quot;${x+dx}&quot; cy=&quot;${y}&quot; r=&quot;20&quot; fill=&quot;${active.includes(i)?'#007d88':'#d5e6e3'}&quot;/&gt;&lt;text x=&quot;${x+dx-7}&quot; y=&quot;${y+8}&quot; style=&quot;fill:${active.includes(i)?'white':'#182b3a'}&quot;&gt;${i+1}&lt;/text&gt;`).join('')}
+document.querySelector('#input').innerHTML=nodes(0,[]);document.querySelector('#edges').innerHTML=points.flatMap(([x,y],i)=&gt;points.slice(i+1).map(([xx,yy])=&gt;`&lt;line class=&quot;edge&quot; x1=&quot;${x+365}&quot; y1=&quot;${y}&quot; x2=&quot;${xx+365}&quot; y2=&quot;${yy}&quot;/&gt;`)).join('');document.querySelector('#tokens').innerHTML=nodes(365,[0,1,2,3]);
+registerAnimation({steps:5,render(step){document.querySelector('#encoder').classList.toggle('hidden',step&lt;1);document.querySelector('#output').innerHTML=nodes(780,seq.slice(0,step));document.querySelector('#path').setAttribute('d',step&lt;2?'':seq.slice(0,step).map((i,k)=&gt;`${k?'L':'M'}${points[i][0]+780},${points[i][1]}`).join(' '));}});
+&lt;/script&gt;&lt;/html&gt;
+" tabindex="-1" title="Attention Modelによる経路構成">
+</iframe>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p></footer><span class="page-number">12 / 18</span></section><section class="slide" data-group="先行研究" data-section-start="false"><h2 id="attention-model次の都市の選び方">Attention Model：次の都市の選び方</h2>
+<p>都市の埋め込みに加え、現在位置・出発都市などの状態を使う。<span class="citation" data-cites="kool2019">[5]</span></p>
+<ol type="1">
+<li>Attentionで、今の状態に関係する都市の情報を集める</li>
+<li>各都市のスコアを計算し、訪問済みの都市を選択候補から除く</li>
+<li>確率分布から選ぶ、または最大の確率を持つ都市を選ぶ</li>
+</ol>
+<p>この処理を繰り返して、1本の巡回路を作る。</p>
+<footer class="citations"><p>[5] W. Kool, H. van Hoof, M. Welling. Attention, Learn to Solve Routing Problems! International Conference on Learning Representations ( ICLR 2019) . 2019.</p></footer><span class="page-number">13 / 18</span></section><section class="slide" data-group="先行研究" data-section-start="false"><h2 id="pomo複数の出発点から学習する">POMO：複数の出発点から学習する</h2>
+<p>同じ巡回路でも出発点は変えられる。この対称性を利用する。<span class="citation" data-cites="kwon2020pomo">[6]</span></p>
+<iframe srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;ja&quot;&gt;&lt;meta charset=&quot;utf-8&quot;/&gt;
+&lt;style&gt;body{margin:0;font:24px 'Hiragino Sans','Yu Gothic',sans-serif}svg{width:100%;height:350px}text{fill:#182b3a}.route{fill:none;stroke-width:4}&lt;/style&gt;
+&lt;svg aria-label=&quot;異なる出発都市から候補経路を作り、平均を基準に学習する&quot; role=&quot;img&quot; viewbox=&quot;0 0 1152 350&quot;&gt;&lt;g id=&quot;routes&quot;&gt;&lt;/g&gt;&lt;text id=&quot;explanation&quot; x=&quot;40&quot; y=&quot;320&quot;&gt;&lt;/text&gt;&lt;/svg&gt;
+&lt;script&gt;/* Each animation implements render(step); the parent owns all navigation. */
+window.registerAnimation = ({steps, render}) =&gt; {
+  if (!Number.isInteger(steps) || steps &lt; 0) throw Error('steps must be a nonnegative integer');
+  window.animation = {steps, step: 0, setStep(n) {
+    this.step = Math.max(0, Math.min(steps, n));
+    render(this.step);
+    document.documentElement.dataset.step = this.step;
+  }};
+  window.animation.setStep(0);
+};
+&lt;/script&gt;&lt;script&gt;
+const pts=[[40,120],[150,75],[245,160],[100,220]],routes=[[0,1,2,3,0],[1,3,0,2,1],[2,3,0,1,2]],colors=['#007d88','#b66a3e','#7471b0'];
+registerAnimation({steps:4,render(step){document.querySelector('#routes').innerHTML=routes.map((r,k)=&gt;`&lt;g transform=&quot;translate(${k*380+15},0)&quot;&gt;&lt;text x=&quot;30&quot; y=&quot;30&quot;&gt;出発都市 ${r[0]+1}&lt;/text&gt;&lt;path class=&quot;route&quot; stroke=&quot;${colors[k]}&quot; d=&quot;${r.slice(0,Math.min(step+1,5)).map((n,i)=&gt;`${i?'L':'M'}${pts[n]}`).join(' ')}&quot;/&gt;${pts.map(([x,y],i)=&gt;`&lt;circle cx=&quot;${x}&quot; cy=&quot;${y}&quot; r=&quot;17&quot; fill=&quot;${i===r[0]?colors[k]:'#d8e4e3'}&quot;/&gt;&lt;text x=&quot;${x-7}&quot; y=&quot;${y+8}&quot; style=&quot;fill:${i===r[0]?'white':'#182b3a'}&quot;&gt;${i+1}&lt;/text&gt;`).join('')}&lt;/g&gt;`).join('');document.querySelector('#explanation').textContent=step&lt;4?'出発点を変えて、複数の候補を構成する':'学習：複数経路の平均を基準に更新　／　推論：最短の候補を採用';}});
+&lt;/script&gt;&lt;/html&gt;
+" tabindex="-1" title="複数の出発点による経路構成">
+</iframe>
+<div class="small">
+<p>回転・反転による8通りの入力拡張は、出発点の数とは別の工夫。</p>
+</div>
+<footer class="citations"><p>[6] Y.-D. Kwon ほか. POMO : Policy Optimization with Multiple Optima for Reinforcement Learning . Advances in Neural Information Processing Systems ( NeurIPS 2020) . 2020.</p></footer><span class="page-number">14 / 18</span></section><section class="slide" data-group="先行研究" data-section-start="false"><h2 id="bopo候補解の優劣から学習する">BOPO：候補解の優劣から学習する</h2>
+<p>目的関数の値を使い、よい候補が選ばれやすいよう学習する。<span class="citation" data-cites="bopo2025">[7]</span></p>
+<ul>
+<li>同じ問題に対して、複数の候補解を生成する</li>
+<li>最良の候補を基準に、他の候補との選好ペアを作る</li>
+<li>目的関数値の差を、学習時の重み付けに反映する</li>
+</ul>
+<p>Attention Modelのようなモデル構造と、学習方法は区別して考える。</p>
+<footer class="citations"><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">15 / 18</span></section><section class="slide section-slide" data-group="実験結果" data-section-start="true"><h1 id="実験結果">実験結果</h1>
+<span class="page-number">16 / 18</span></section><section class="slide" data-group="実験結果" data-section-start="false"><h2 id="公開論文の結果tsp100">公開論文の結果：TSP100</h2>
+<p>一様分布から生成した100都市の問題、<strong>1,000問</strong>の結果。<span class="citation" data-cites="bopo2025">[7]</span></p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>手法</th>
+<th style="text-align: right;">平均経路長</th>
+<th style="text-align: right;">ギャップ</th>
+<th style="text-align: right;">合計求解時間</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Concorde</td>
+<td style="text-align: right;">7.75</td>
+<td style="text-align: right;">0.00%</td>
+<td style="text-align: right;">1時間</td>
+</tr>
+<tr class="even">
+<td>LKH3</td>
+<td style="text-align: right;">7.75</td>
+<td style="text-align: right;">0.00%</td>
+<td style="text-align: right;">25分</td>
+</tr>
+<tr class="odd">
+<td>POMO（入力拡張あり）</td>
+<td style="text-align: right;">7.77</td>
+<td style="text-align: right;">0.14%</td>
+<td style="text-align: right;">18.1秒</td>
+</tr>
+<tr class="even">
+<td>BOPO（入力拡張あり）</td>
+<td style="text-align: right;">7.75</td>
+<td style="text-align: right;">0.04%</td>
+<td style="text-align: right;">18.1秒</td>
+</tr>
+</tbody>
+</table>
+<div class="small">
+<p>BOPO論文 Table 2。時間は学習を除く1,000問の合計。NCOは8通りの入力拡張を使用。論文の実験環境：TITAN Xp GPU・Xeon E5-2680 CPU。手法間で並列化条件も異なる。</p>
+</div>
+<footer class="citations"><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">17 / 18</span></section><section class="slide" data-group="実験結果" data-section-start="false"><h2 id="結果の読み方とまとめ">結果の読み方とまとめ</h2>
+<p><strong>短時間に良い候補を作る手段</strong>として、NCOには可能性がある。<span class="citation" data-cites="bopo2025">[7]</span></p>
+<ul>
+<li>同じベンチマークで、POMOからBOPOへギャップが小さくなった</li>
+<li>表の経路長は丸めた値。7.75でも最適解と一致するとは限らない</li>
+<li>他の規模・分布・制約でも同じ性能になるとは限らない</li>
+</ul>
+<p>学習コストと求解頻度を合わせて、既存の解法との使い分けを考える。</p>
+
+<footer class="citations"><p>[7] Z. Liao ほか. BOPO : Neural Combinatorial Optimization via Best-anchored and Objective-guided Preference Optimization . Proceedings of the 42nd International Conference on Machine Learning ( ICML 2025) . 2025.</p></footer><span class="page-number">18 / 18</span></section></main><nav aria-label="スライド操作" id="toolbar"><button aria-label="スライド一覧" id="menu">☰</button><button aria-label="全画面" id="fullscreen">⛶</button></nav><aside aria-label="スライド一覧" aria-modal="true" hidden="" id="overview" role="dialog"><button id="close">閉じる</button><p id="help">↑↓ ページ · ←→ step · 左右長押しで先頭／最後 · 画面左30%で戻る／それ以外で進む</p></aside><script>(() => {
+const slides=[...document.querySelectorAll('.slide')], stage=document.querySelector('#stage'), overview=document.querySelector('#overview');
+let index=0, step=0, held=null, timer=null, long=false;
+const frames=s=>[...s.querySelectorAll('iframe')];
+function maxStep(){return Math.max(0,...frames(slides[index]).map(f=>f.contentWindow.animation?.steps||0),...[...slides[index].querySelectorAll('[data-step]')].map(e=>Number(e.dataset.step)));}
+function paint(){slides.forEach((s,i)=>{s.classList.toggle('active',i===index);s.setAttribute('aria-hidden',String(i!==index));}); frames(slides[index]).forEach(f=>f.contentWindow.animation?.setStep(step));slides[index].querySelectorAll('[data-step]').forEach(e=>e.classList.toggle('pending',Number(e.dataset.step)>step)); history.replaceState(null,'',`#${index+1}/${step}`);}
+function go(i,n=0){index=Math.max(0,Math.min(slides.length-1,i));step=Math.max(0,Math.min(maxStep(),n));paint();}
+function move(dir){if(dir>0){step<maxStep()?go(index,step+1):go(index+1);}else{step>0?go(index,step-1):(index>0&&go(index-1,Infinity));}}
+function jump(dir){go(index,dir>0?Infinity:0);}
+function resize(){let scale=Math.min(innerWidth/1280,innerHeight/720);stage.style.transform=`scale(${scale})`;stage.style.left=`${(innerWidth-1280*scale)/2}px`;stage.style.top=`${(innerHeight-720*scale)/2}px`;}
+function close(){overview.hidden=true;document.querySelector('#menu').focus();}
+function menu(){overview.hidden=false;overview.querySelectorAll('.thumb').forEach((b,i)=>b.setAttribute('aria-current',String(i===index)));overview.querySelector('#close').focus();}
+const grouped=slides.some(s=>s.dataset.sectionStart==='true');
+let row;
+slides.forEach((s,i)=>{if(!row||s.dataset.sectionStart==='true'){if(grouped){const h=document.createElement('h2');h.textContent=s.dataset.group||'表紙';overview.append(h);}row=document.createElement('div');row.className=grouped?'overview-row':'overview-grid';overview.append(row);}const b=document.createElement('button');b.className='thumb';const num=document.createElement('span');num.textContent=String(i+1).padStart(2,'0');b.append(num,document.createTextNode(s.querySelector('h1,h2')?.textContent||'Slide'));b.onclick=()=>{go(i);close();};row.append(b);});
+document.querySelector('#menu').onclick=menu;document.querySelector('#close').onclick=close;
+async function fullscreen(){try {if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else document.querySelector('#fullscreen').textContent='全画面非対応';}catch{document.querySelector('#fullscreen').textContent='全画面非対応';}}
+document.querySelector('#fullscreen').onclick=fullscreen;
+function cancel(){clearTimeout(timer);held=null;long=false;}
+addEventListener('keydown',e=>{if(e.target.closest('input,textarea,select'))return;if(!overview.hidden){if(e.key==='Escape')close();if(e.key==='Tab'){const items=[...overview.querySelectorAll('button')];if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===items.at(-1)){e.preventDefault();items[0].focus();}}return;}if(e.target.closest('button,a')&&(e.key===' '||e.key==='Enter'))return;
+if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();if(held)return;held=e.key;long=false;timer=setTimeout(()=>{long=true;jump(e.key==='ArrowRight'?1:-1);},450);return;}
+if(e.repeat)return;if(['ArrowDown','ArrowUp',' ','Escape','o','f'].includes(e.key))e.preventDefault();if(e.key==='ArrowDown')go(index+1);if(e.key==='ArrowUp')go(index-1);if(e.key===' ')move(1);if(e.key==='Escape'||e.key==='o')menu();if(e.key==='f')fullscreen();});
+addEventListener('keyup',e=>{if(e.key===held){if(!long)move(e.key==='ArrowRight'?1:-1);cancel();}});addEventListener('blur',cancel);document.addEventListener('visibilitychange',cancel);
+stage.addEventListener('click',e=>{if(e.target.closest('a,button,input')||!overview.hidden)return;const r=stage.getBoundingClientRect();move(e.clientX-r.left<r.width*.3?-1:1);});
+window.deck={go,move,jump,maxStep,get index(){return index},get step(){return step},get count(){return slides.length}};
+addEventListener('resize',resize);resize();
+Promise.all([...document.querySelectorAll('iframe')].map(f=>new Promise(resolve=>{if(f.contentWindow?.animation)resolve();else f.addEventListener('load',resolve,{once:true});}))).then(()=>{const m=location.hash.match(/^#(\d+)(?:\/(\d+))?$/);go(m?Number(m[1])-1:0,m?Number(m[2]||0):0);window.deckReady=true;});
+})();
+</script></body></html>

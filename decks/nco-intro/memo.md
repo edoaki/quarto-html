@@ -1,0 +1,56 @@
+# スライド案の例
+
+対象読者：組合せ最適化やNCOを初めて学ぶ人。
+伝えたいこと：従来の解法と比較しながら、学習済みモデルを繰り返し利用するNCOの考え方を紹介する。
+公開範囲：公開済みのAttention Model・POMO・BOPOまで。独自の並列モデル・実験結果・氏名は含めない。
+
+## 1. 研究背景
+
+社会にある実問題から、組合せ最適化を導入する。
+
+HTML --
+
+左右に2つの問題例を出す。それぞれのアニメーションの下に「決めるもの・制約・目的」を書く。
+
+左側：配送経路。四角の中に倉庫1つと家を複数置き、倉庫から線が伸びて経路が作られる。
+
+右側：ものの加工順。ジョブショップを例にし、製品3つと機械A・B・Cを用意する。製品ごとの作業を色で区別し、横軸を時間、縦軸を機械にする。
+
+初期状態では配送先と機械の時間軸だけを見せる。stepごとに経路を伸ばし、作業を時間軸へ配置する。作業の長さと機械の使用順は変化をつけ、同じ機械での重なりと製品内の工程順を守る。
+
+最後には配送経路が倉庫へ戻り、全作業が配置される。
+
+--
+
+続いてTSPを定義し、数理最適化とヒューリスティクス・局所探索を紹介する。
+
+## 2. NCO
+
+学習と利用を分けて説明する。メリットは速い候補生成、候補の比較、よい初期解としての利用。デメリットは学習負担、分布・規模の変化、最適性保証の不在と制約の扱い。
+
+日々似た問題を繰り返し解く場面で使えると考えている、まで述べる。
+
+## 3. 先行研究
+
+Attention Model：座標 → エンコーダーの埋め込み → デコーダーで未訪問の都市を選ぶ。
+POMO：複数の出発点から解を作る。平均を学習の基準とし、推論ではよい候補を採る。8通りの入力拡張と出発点の数を混同しない。
+BOPO：候補の目的関数値から選好ペアを作って学習する。
+
+## 4. 実験結果
+
+BOPO論文Table 2のTSP100からConcorde・LKH3・POMO(aug.)・BOPO(aug.)を抜粋。
+時間は1,000問の合計であり、学習時間を含まない。論文の計算機はTITAN Xp GPUとXeon E5-2680 CPU。異なるハードウェア・並列化を含むため、1問の速度や学習まで含む優劣に読み替えない。
+
+## 原典の確認記録
+
+2026-10-22確認。書誌情報は reference.bib に記録。
+
+- Dantzig et al. (1954): https://doi.org/10.1287/opre.2.4.393
+- OR-Tools Job Shop: https://developers.google.com/optimization/scheduling/job_shop
+- Gurobi Objectives: https://docs.gurobi.com/projects/optimizer/en/current/concepts/modeling/objectives.html
+- Lin & Kernighan (1973): https://doi.org/10.1287/opre.21.2.498
+- Attention Model: https://arxiv.org/abs/1803.08475
+- POMO: https://proceedings.neurips.cc/paper/2020/hash/f231f2107df69eab0a3862d50018a9b2-Abstract.html
+- BOPO: https://proceedings.mlr.press/v267/liao25a.html （本文Table 2、実験設定§5、TSP設定§5.2）
+
+図の座標・経路・スケジュールは説明用に固定した例。実験表は上記論文の数値。

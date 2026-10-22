@@ -1,0 +1,7 @@
+[project]
+name = "quarto-html"
+version = "0.1.0"
+description = "Offline Quarto animation slides"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["beautifulsoup4>=4.13", "playwright>=1.55", "pypdf>=6", "pyyaml>=6"]

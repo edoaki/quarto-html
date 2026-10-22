@@ -1,0 +1,13 @@
+---
+name: quarto-slides
+description: このリポジトリでQuartoのHTMLアニメーションスライドを新規作成・編集し、単一HTMLと最終stepのPDFを出力する。
+---
+
+- スライド案の対象読者・結論・説明順・必要なデータを確認する。情報が不足する、流れが不自然、公開範囲が不明なら、質問し、回答前にスライドを作り始めない。
+- 新規作成は `uv run scripts/slides.py new <名前>`。既存フォルダのコピーは `new <名前> --from <元の名前>`。案を `decks/<名前>/memo.md` に残し、同フォルダのQMD・文献・画像・スタイルを編集する。
+- `#` は章、`##` は1枚のスライド。本文は最小限とし、発表者ノートを増やさない。引用は `[@key]`、出典を `reference.bib` に登録する。原典で事実・実験条件を確認する。
+- HTML図は `uv run scripts/slides.py animation <図名>` で共有 `html/` に作る。表示されるiframe行をQMDへ挿入する。`registerAnimation({steps, render})` のrenderは任意のstepへ直接移動・巻き戻しできる決定的な描画にする。タイマーで勝手に進めない。
+- 編集後は必ず `uv run scripts/slides.py build <名前>` を実行し、HTMLとPDFの両方を出力する。失敗を修正して再実行する。自動検査だけに頼らず `.build/<名前>/` の各ページ画像とPDFを見て、文字・図・フッターの重なりや欠けを確認する。
+- 完了報告はユーザーがすぐ見られる `output/<名前>.html` と `.pdf` のリンクを短く示す。実行できなかった検証は明記する。
+
+操作・フォルダ構成・アニメーションAPIの詳細は [README](../../../../README.md) を参照する。
