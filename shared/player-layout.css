@@ -47,3 +47,10 @@ body.export #stage{left:32px!important;top:18px!important;transform:scale(.95)!i
 #stage .footnote-small{bottom:30px}
 /* PDF captures the live final state, rather than the old static fallback. */
 @media print{body.export .animation{display:block!important}body.export .print-scenes{display:none!important}}
+
+/* Highlight existing content without revealing/hiding or moving table cells. */
+.highlight{display:inline-block;padding:2px 9px;border-radius:4px;background:transparent;box-shadow:inset 0 0 0 2px transparent}
+.highlight.animate-highlight{transition:background-color 280ms ease,box-shadow 280ms ease,color 280ms ease}
+.highlight.is-highlighted{background:#fff0b8;color:#754500;box-shadow:inset 0 0 0 2px #e7b54b}
+body.export .highlight{transition:none}
+@media(prefers-reduced-motion:reduce){.highlight.animate-highlight{transition:none}}

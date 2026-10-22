@@ -85,6 +85,8 @@ registerAnimation({
 
 共有 `frame.js` を読み込む雛形が自動生成されます。親プレイヤーがstepを管理し、複数iframeは同時進行、短い図は最終stepで止まります。自動再生タイマーは使わず、最終状態を確定させてください。本文も `<div data-step="1">…</div>` で段階表示できます。
 
+表の数値などを順に強調するときは `[0.04%]{.highlight data-highlight-step="1"}` と書きます。指定stepで背景がハイライトされ、戻すと解除されます。PDFでは最後の強調状態を出力します。
+
 画像・CSS・通常のJS・iframeはビルド時に内包します。外部CDN・CSSの `@import`・`srcset` は使いません。静的なローカルES moduleのimportはPythonで内包します。動的fetchや外部importは避け、必要なデータをローカルへ用意します。コードセルを実行する構成は雛形に含みません。
 
 ## 引用

@@ -22,7 +22,7 @@ export function createMotion(stage){
     // 文言の違うtextは別の要素として出し直す。書き換えた文字を別位置へ補間すると、無関係な文字が飛んで見える。
     const key=nc.getAttribute('data-key'),sameText=c=>c.tagName!=='text'||c.textContent===nc.textContent;let oc=children.find(c=>!used.has(c)&&c.tagName===nc.tagName&&(key?c.getAttribute('data-key')===key:!c.hasAttribute('data-key'))&&sameText(c));
     if(oc){used.add(oc);sync(oc,nc);}
-    else{oc=nc.cloneNode(true);old.append(oc);if(duration){const opacity=nc.getAttribute('opacity')??'1';oc.setAttribute('opacity','0');tweens.push(t=>oc.setAttribute('opacity',String(t*+opacity)));
+    else{oc=nc.cloneNode(true);old.append(oc);if(duration&&nc.getAttribute('data-no-fade')!=='true'){const opacity=nc.getAttribute('opacity')??'1';oc.setAttribute('opacity','0');tweens.push(t=>oc.setAttribute('opacity',String(t*+opacity)));
       for(const ln of [oc,...oc.querySelectorAll('line')].filter(e=>e.tagName==='line')){const x=+ln.getAttribute('x1'),y=+ln.getAttribute('y1'),X=+ln.getAttribute('x2'),Y=+ln.getAttribute('y2');tweens.push(t=>{ln.setAttribute('x2',x+(X-x)*t);ln.setAttribute('y2',y+(Y-y)*t);});}
     }}old.append(oc);
    }

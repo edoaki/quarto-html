@@ -46,7 +46,7 @@ BOPO論文Table 2のTSP100からConcorde・LKH3・POMO(aug.)・BOPO(aug.)を抜�
 2026-10-22確認。書誌情報は reference.bib に記録。
 
 - Dantzig et al. (1954): https://doi.org/10.1287/opre.2.4.393
-- OR-Tools Job Shop: https://developers.google.com/optimization/scheduling/job_shop
+- Manne (1960), On the Job-Shop Scheduling Problem: https://doi.org/10.1287/opre.8.2.219 （2026-10-22に[2]を解説ページから原論文へ変更）
 - Gurobi Objectives: https://docs.gurobi.com/projects/optimizer/en/current/concepts/modeling/objectives.html
 - Lin & Kernighan (1973): https://doi.org/10.1287/opre.21.2.498
 - Attention Model: https://arxiv.org/abs/1803.08475
@@ -62,3 +62,5 @@ BOPO論文Table 2のTSP100からConcorde・LKH3・POMO(aug.)・BOPO(aug.)を抜�
 元図の既知の重なり：Attention Modelデコーダーのstep16では、都市4と100%のラベルの外接矩形が約6px重なる。元の配置を維持する指示に従って変更せず、ビルドのreference_warningsに記録する。他の重なり検査は継続する。
 
 デザイン更新：ユーザーの追加指示により、図の配置・動きは維持し、表紙・章扉・見出し・表・引用の外観を青系で整えた。ページ番号は右下で罫線の上に独立させる。
+
+実験結果は1ページにまとめ、BOPO単独ページと結果後のまとめは省略。ギャップ（step1）、NCOの合計求解時間（step2）を順にハイライトする。BOPOの説明と比較条件は表の下に注釈として置く。

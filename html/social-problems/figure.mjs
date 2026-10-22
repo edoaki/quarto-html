@@ -39,7 +39,7 @@ function schedule(placed){let s=text(580,32,'金属部品の加工順',26);
  jobs.forEach((ops,j)=>ops.forEach(([m,d],k)=>{const on=order.indexOf(`${j}-${k}`)<placed,x=on?x0+start[j][k]*unit:poolX(j,k),y=on?rowY(m):poolY(j);
   if(on&&start[j][k]>ready[j][k])s+=keyed(`wait-${j}-${k}`,line(x0+ready[j][k]*unit+2,y+37,x0+start[j][k]*unit-2,y+37,color[j],true,3));
   // 箱と文字は同じ座標系で移動する。工程名と品目名は別の文字要素として切り替える。
-  s+=keyed(`op-${j}-${k}`,rect(1,0,d*unit-2,30,color[j])+keyed(on?'product-label':'machine-label',text(d*unit/2,22,on?products[j]:machine[m],18,C.paper,'middle')),`transform="translate(${x} ${y})"`);}));
+  s+=keyed(`op-${j}-${k}`,rect(1,0,d*unit-2,30,color[j])+keyed(on?'product-label':'machine-label',text(d*unit/2,22,on?products[j]:machine[m],18,C.paper,'middle'),'data-no-fade="true"'),`transform="translate(${x} ${y})"`);}));
  return s+text(580,textY[0],'決めるもの：各設備で加工する品目の順番',22)+text(580,textY[1],'制約：加工の順序、設備は同時に1品目',21,C.muted)+text(580,textY[2],'目的：全品目の完了時刻を早める',21,C.muted);}
 const scene=(k,count=k>=1?route.length-1:0,placed=k>=2?order.length:0)=>svg(delivery(count)+line(550,48,550,422,C.light,false,2)+schedule(placed),'配送経路とスケジューリング');
 export default {id:'F12',title:'配送経路とスケジューリング',steps:['配送先と作業','訪問順を決める','各機械の処理順を決める'],renderStep(k){return scene(k);},

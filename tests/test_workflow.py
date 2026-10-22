@@ -143,6 +143,66 @@ End.
         self.assertTrue(page.locator('#background iframe').is_visible())
         page.close()
 
+    def example_page(self, slide_id):
+        page=self.browser.new_page(viewport={'width':1280,'height':720})
+        page.goto((ROOT/'output/nco-intro.html').as_uri());page.wait_for_function('window.deckReady')
+        page.evaluate('(id)=>deck.go([...document.querySelectorAll(".slide")].findIndex(s=>s.id===id))',slide_id)
+        return page
+
+    def test_processing_labels_stay_opaque_during_motion(self):
+        page=self.example_page('background')
+        result=page.locator('#background iframe').content_frame.locator('svg').evaluate("""async () => {
+            await animation.setStep(1,false);
+            let running=true,samples=0,minOpacity=1,missing=0;
+            const completion=animation.setStep(2,true).then(()=>running=false);
+            while(running){
+                const ops=[...document.querySelectorAll('[data-key^="op-"]')];
+                for(const op of ops){const label=op.querySelector('text');if(!label){missing++;continue;}
+                    let alpha=1;for(let el=label;el&&el!==op.parentElement;el=el.parentElement)alpha*=Number(getComputedStyle(el).opacity);
+                    minOpacity=Math.min(minOpacity,alpha);
+                }
+                samples++;await new Promise(requestAnimationFrame);
+            }
+            await completion;return {samples,minOpacity,missing};
+        }""")
+        self.assertGreater(result['samples'],20)
+        self.assertEqual(result['missing'],0)
+        self.assertEqual(result['minOpacity'],1)
+        page.close()
+
+    def test_heuristic_selection_and_route_begin_together(self):
+        page=self.example_page('heuristic')
+        result=page.locator('#heuristic iframe').content_frame.locator('svg').evaluate("""async () => {
+            await animation.setStep(0,false);
+            let running=true,selectedAt=null,routeAt=null,tick=0;
+            const completion=animation.setStep(1,true).then(()=>running=false);
+            while(running){
+                const chosen=document.querySelector('[data-key^="dist-"] rect[fill="#ae641a"]');
+                const edge=document.querySelector('[data-key^="route-"] line');
+                if(chosen&&selectedAt===null)selectedAt=tick;
+                if(edge&&routeAt===null)routeAt=tick;
+                tick++;await new Promise(requestAnimationFrame);
+            }
+            await completion;return {selectedAt,routeAt};
+        }""")
+        self.assertIsNotNone(result['selectedAt'])
+        self.assertEqual(result['selectedAt'],result['routeAt'])
+        page.close()
+
+    def test_results_highlights_reverse_and_export(self):
+        page=self.example_page('result-tsp')
+        before=page.locator('#result-tsp table').inner_text()
+        self.assertEqual(page.locator('#result-tsp .is-highlighted').count(),0)
+        page.keyboard.press('ArrowRight')
+        self.assertEqual(page.locator('#result-tsp .is-highlighted').all_text_contents(),['0.14%','0.04%'])
+        page.keyboard.press('ArrowRight');self.assertEqual(page.locator('#result-tsp .is-highlighted').count(),4)
+        page.keyboard.press('ArrowLeft');self.assertEqual(page.locator('#result-tsp .is-highlighted').count(),2)
+        self.assertEqual(page.locator('#result-tsp table').inner_text(),before)
+        page.evaluate('deck.jump(1)');page.emulate_media(media='print');page.evaluate("document.body.classList.add('export')")
+        self.assertEqual(page.locator('#result-tsp .is-highlighted').count(),4)
+        self.assertTrue(all(page.locator('#result-tsp .is-highlighted').nth(i).is_visible() for i in range(4)))
+        page.close()
+
     def test_missing_resource_fails(self):
         from bs4 import BeautifulSoup
         with self.assertRaises(FileNotFoundError):slides.bundle(BeautifulSoup('<img src="images/missing.png">','html.parser'),self.folder)

@@ -38,8 +38,8 @@ function scene({moves=0,decision=null,picked=true,candOpacity=1,compare=false}={
  return svg(s,'最近傍法で今いる都市から最も近い未訪問の都市へ順に進み、最適経路と比べる',W,H);}
 
 const state=k=>[{},{moves:1,decision:0},{moves:n},{moves:n,compare:true}][k];
-// 1つの判断：候補までの距離を出す → 最も近い都市を強調 → その都市へ進む。
-const decide=(i,fast=1)=>[{markup:scene({moves:i,decision:i,picked:false}),duration:600*fast},{markup:scene({moves:i,decision:i}),duration:350*fast,hold:250*fast},{markup:scene({moves:i+1,decision:i}),duration:600*fast}];
+// 1つの判断：候補までの距離を出す → 選択の強調と経路の描画を同じフレームで開始。
+const decide=(i,fast=1)=>[{markup:scene({moves:i,decision:i,picked:false}),duration:600*fast},{markup:scene({moves:i+1,decision:i}),duration:600*fast,hold:250*fast}];
 export default {id:'F22',title:'最近傍法',steps,
  renderStep(k){return scene(state(k));},
  transition(from,to){if(to!==from+1)return null;
